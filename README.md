@@ -4,4 +4,10 @@
 
 This is the Go implementation of the [imretro image format][main repo].
 
+## Import
+
+```go
+import "github.com/imretro/go" // Imports the "imretro" package
+```
+
 [main repo]: https://github.com/imretro/imretro
