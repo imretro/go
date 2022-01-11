@@ -239,6 +239,18 @@ func TestEncodeTooLargeDimension(t *testing.T) {
 	}
 }
 
+// TestEncodeUnsupportedMode tests that Encode should fail when a bad PixelMode
+// is passed.
+func TestEncodeUnsupportedMode(t *testing.T) {
+	var b bytes.Buffer
+	m := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	want := UnsupportedBitModeError(1)
+
+	if err := Encode(&b, m, 1); err != want {
+		t.Fatalf(`err = %v, want %v`, err, want)
+	}
+}
+
 // FailDimensionHelper fails if the dimension is not the wanted value.
 func FailDimensionHelper(t *testing.T, b *bytes.Buffer, dimension, byteSignificance string, want byte) {
 	t.Helper()

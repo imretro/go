@@ -10,6 +10,18 @@ import (
 
 // Encode writes the image m to w in imretro format.
 func Encode(w io.Writer, m image.Image, pixelMode PixelMode) error {
+	var helper encoderHelper
+	switch pixelMode {
+	case OneBit:
+		helper = encodeOneBit
+	case TwoBit:
+		helper = encodeTwoBit
+	case EightBit:
+		helper = encodeEightBit
+	default:
+		return UnsupportedBitModeError(pixelMode)
+	}
+
 	if _, err := w.Write([]byte("IMRETRO")); err != nil {
 		return err
 	}
@@ -32,17 +44,12 @@ func Encode(w io.Writer, m image.Image, pixelMode PixelMode) error {
 	if err := writePalette(w, DefaultModelMap[pixelMode].(ColorModel)); err != nil {
 		return err
 	}
-
-	switch pixelMode {
-	case OneBit:
-		return encodeOneBit(w, m)
-	case TwoBit:
-		return encodeTwoBit(w, m)
-	case EightBit:
-		return encodeEightBit(w, m)
-	}
-	return UnsupportedBitModeError(pixelMode)
+	return helper(w, m)
 }
+
+// EncoderHelper is a unifying type for the specialized pixel encoding
+// functions.
+type encoderHelper = func(io.Writer, image.Image) error
 
 func encodeOneBit(w io.Writer, m image.Image) error {
 	// NOTE Write the pixels
