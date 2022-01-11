@@ -77,3 +77,13 @@ func TestImagePalette(t *testing.T) {
 		CompareColors(t, actual, want)
 	}
 }
+
+// TestDimensionsTooLargeError tests that the correct string representation of
+// the error is returned.
+func TestDimensionsTooLargeError(t *testing.T) {
+	err := DimensionsTooLargeError(1 << 16)
+	want := "Dimensions too large for 16-bit number: 65536"
+	if s := err.Error(); s != want {
+		t.Fatalf(`Error() = %q, want %q`, s, want)
+	}
+}
