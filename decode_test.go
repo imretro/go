@@ -371,6 +371,41 @@ func TestDecodeMissingModel(t *testing.T) {
 	}
 }
 
+// TestDecodeReaderError tests that a reader error would be returned if it
+// occurs.
+func TestDecodeReaderError(t *testing.T) {
+	var r io.Reader
+	var err error
+
+	r = bytes.NewBuffer([]byte{})
+	if _, err = DecodeConfig(r, nil); err == nil {
+		t.Errorf(`err = nil`)
+	}
+
+	r = io.LimitReader(MakeImretroReader(EightBit, nil, 1, 1, []byte{0}), 10)
+	if _, err = DecodeConfig(r, nil); err == nil {
+		t.Errorf(`err = nil`)
+	}
+
+	r = errorReader{}
+	if _, err = decode1bitModel(r); err == nil {
+		t.Errorf(`err = nil`)
+	}
+	if _, err = decode2bitModel(r); err == nil {
+		t.Errorf(`err = nil`)
+	}
+	if _, err = decode8bitModel(r); err == nil {
+		t.Errorf(`err = nil`)
+	}
+
+	r = &errorLimitReader{
+		&io.LimitedReader{MakeImretroReader(EightBit, nil, 10, 10, make([]byte, 100)), 50},
+	}
+	if _, err = Decode(r, nil); err == nil {
+		t.Errorf(`err = nil`)
+	}
+}
+
 // TestDecodeError tests that the proper string representation of a failure to
 // decode is returned.
 func TestDecodeError(t *testing.T) {

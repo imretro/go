@@ -1,7 +1,9 @@
 package imretro
 
 import (
+	"errors"
 	"image/color"
+	"io"
 	"testing"
 )
 
@@ -32,4 +34,25 @@ func CompareColors(t *testing.T, actual, want color.Color) {
 type channelComparison struct {
 	name         string
 	actual, want uint32
+}
+
+// ErrorReader always returns an error.
+type errorReader struct{}
+
+func (r errorReader) Read([]byte) (int, error) {
+	return 0, errors.New("Always error")
+}
+
+// ErrorLimitReader is like io.LimitedReader, but returns an error that is
+// not EOF.
+type errorLimitReader struct {
+	R *io.LimitedReader
+}
+
+func (r *errorLimitReader) Read(p []byte) (n int, err error) {
+	n, err = r.R.Read(p)
+	if err == io.EOF {
+		err = errors.New("EOF but worse")
+	}
+	return
 }
