@@ -22,4 +22,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: 'gh release create "$GITHUB_REF_NAME" -F RELEASE_NOTES -t "${{ steps.subject.outputs.SUBJECT }}"'
-  
