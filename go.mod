@@ -1,4 +1,4 @@
-module imretro
+module github.com/imretro/go
 
 go 1.16
 
