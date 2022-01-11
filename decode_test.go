@@ -361,6 +361,15 @@ func TestDecodeMissingModel(t *testing.T) {
 	}
 }
 
+// TestDecodeError tests that the proper string representation of a failure to
+// decode is returned.
+func TestDecodeError(t *testing.T) {
+	err := DecodeError("Failed!")
+	if s := err.Error(); s != "Failed!" {
+		t.Fatalf(`Error() = %q, want "Failed!"`, s)
+	}
+}
+
 // MakeImretroReader makes a 1-bit imretro reader.
 func MakeImretroReader(mode byte, palette [][]byte, width, height uint16, pixels []byte) *bytes.Buffer {
 	b := bytes.NewBuffer([]byte{
