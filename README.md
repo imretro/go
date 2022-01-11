@@ -1,6 +1,6 @@
 # imretro
 
-[![codecov](https://codecov.io/gh/spenserblack/imretro/branch/master/graph/badge.svg?token=k8kLfJtxX0)](https://codecov.io/gh/spenserblack/imretro)
+[![codecov](https://codecov.io/gh/imretro/go/branch/main/graph/badge.svg?token=5M6HM5EJ7X)](https://codecov.io/gh/imretro/go)
 
 An image format for retro-style images
 
