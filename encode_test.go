@@ -200,6 +200,33 @@ func TestEncodeWriteFailures(t *testing.T) {
 	}
 }
 
+// TestEncodeTinyImages tests that extremely small images, which require less
+// than a byte for all pixels, won't break.
+func TestEncodeTinyImages(t *testing.T) {
+	m := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	m.Set(0, 0, White)
+	tests := []*struct {
+		mode PixelMode
+		want byte
+	}{
+		{OneBit, 0b1000_0000},
+		{TwoBit, 0b1100_0000},
+	}
+
+	for _, test := range tests {
+		var b bytes.Buffer
+		t.Logf(`Testing mode %08b`, test.mode)
+		Encode(&b, m, test.mode)
+
+		byteSlice := b.Bytes()
+		lastByte := byteSlice[len(byteSlice)-1]
+
+		if lastByte != test.want {
+			t.Errorf(`Last byte = %08b, want %08b`, lastByte, test.want)
+		}
+	}
+}
+
 // TestEncodeTooLargeDimension tests that Encode should fail when the image has
 // unsupported dimensions.
 func TestEncodeTooLargeDimension(t *testing.T) {
