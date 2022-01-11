@@ -10,8 +10,12 @@ import (
 
 // Encode writes the image m to w in imretro format.
 func Encode(w io.Writer, m image.Image, pixelMode PixelMode) error {
-	w.Write([]byte("IMRETRO"))
-	w.Write([]byte{pixelMode | WithPalette})
+	if _, err := w.Write([]byte("IMRETRO")); err != nil {
+		return err
+	}
+	if _, err := w.Write([]byte{pixelMode | WithPalette}); err != nil {
+		return err
+	}
 
 	bounds := m.Bounds()
 	width, height := bounds.Dx(), bounds.Dy()
@@ -20,10 +24,14 @@ func Encode(w io.Writer, m image.Image, pixelMode PixelMode) error {
 		if d > MaximumDimension {
 			return DimensionsTooLargeError(d)
 		}
-		w.Write(byteutils.BytesFromUint16(uint16(d), byteutils.LittleEndian))
+		if _, err := w.Write(byteutils.BytesFromUint16(uint16(d), byteutils.LittleEndian)); err != nil {
+			return err
+		}
 	}
 
-	writePalette(w, DefaultModelMap[pixelMode].(ColorModel))
+	if err := writePalette(w, DefaultModelMap[pixelMode].(ColorModel)); err != nil {
+		return err
+	}
 
 	switch pixelMode {
 	case OneBit:
