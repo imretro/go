@@ -10,8 +10,24 @@ import (
 
 // Encode writes the image m to w in imretro format.
 func Encode(w io.Writer, m image.Image, pixelMode PixelMode) error {
-	w.Write([]byte("IMRETRO"))
-	w.Write([]byte{pixelMode | WithPalette})
+	var helper encoderHelper
+	switch pixelMode {
+	case OneBit:
+		helper = encodeOneBit
+	case TwoBit:
+		helper = encodeTwoBit
+	case EightBit:
+		helper = encodeEightBit
+	default:
+		return UnsupportedBitModeError(pixelMode)
+	}
+
+	if _, err := w.Write([]byte("IMRETRO")); err != nil {
+		return err
+	}
+	if _, err := w.Write([]byte{pixelMode | WithPalette}); err != nil {
+		return err
+	}
 
 	bounds := m.Bounds()
 	width, height := bounds.Dx(), bounds.Dy()
@@ -20,26 +36,29 @@ func Encode(w io.Writer, m image.Image, pixelMode PixelMode) error {
 		if d > MaximumDimension {
 			return DimensionsTooLargeError(d)
 		}
-		w.Write(byteutils.BytesFromUint16(uint16(d), byteutils.LittleEndian))
+		if _, err := w.Write(byteutils.BytesFromUint16(uint16(d), byteutils.LittleEndian)); err != nil {
+			return err
+		}
 	}
 
-	writePalette(w, DefaultModelMap[pixelMode].(ColorModel))
-
-	switch pixelMode {
-	case OneBit:
-		return encodeOneBit(w, m)
-	case TwoBit:
-		return encodeTwoBit(w, m)
-	case EightBit:
-		return encodeEightBit(w, m)
+	if err := writePalette(w, DefaultModelMap[pixelMode].(ColorModel)); err != nil {
+		return err
 	}
-	return UnsupportedBitModeError(pixelMode)
+	return helper(w, m)
 }
+
+// EncoderHelper is a unifying type for the specialized pixel encoding
+// functions.
+type encoderHelper = func(io.Writer, image.Image) error
 
 func encodeOneBit(w io.Writer, m image.Image) error {
 	// NOTE Write the pixels
 	bounds := m.Bounds()
-	buffer := make([]byte, 1, (bounds.Dx()*bounds.Dy())/8)
+	buffcap := (bounds.Dx() * bounds.Dy()) / 8
+	if buffcap == 0 {
+		buffcap = 1
+	}
+	buffer := make([]byte, 1, buffcap)
 	var bitIndex byte = 0
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
@@ -62,7 +81,11 @@ func encodeOneBit(w io.Writer, m image.Image) error {
 func encodeTwoBit(w io.Writer, m image.Image) error {
 	// NOTE Write the pixels
 	bounds := m.Bounds()
-	buffer := make([]byte, 1, (bounds.Dx()*bounds.Dy())/4)
+	buffcap := (bounds.Dx() * bounds.Dy()) / 4
+	if buffcap == 0 {
+		buffcap = 1
+	}
+	buffer := make([]byte, 1, buffcap)
 	var bitIndex byte = 0
 
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {

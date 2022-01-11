@@ -177,6 +177,80 @@ func TestEncode8BitPixels(t *testing.T) {
 	}
 }
 
+// TestEncodeWriteFailures tests that encode will return errors when writing
+// fails.
+func TestEncodeWriteFailures(t *testing.T) {
+	tests := []*struct {
+		byteCount int
+		expect    string
+	}{
+		{0, "failure to write signature"},
+		{7, "failure to write mode"},
+		{8, "failure to write dimensions"},
+		{12, "failure to write palette"},
+	}
+	m := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	for i, test := range tests {
+		t.Logf(`Test %d`, i)
+		b := &cappedWriter{cap: test.byteCount}
+
+		if err := Encode(b, m, OneBit); err == nil {
+			t.Error(`err = nil`)
+		}
+	}
+}
+
+// TestEncodeTinyImages tests that extremely small images, which require less
+// than a byte for all pixels, won't break.
+func TestEncodeTinyImages(t *testing.T) {
+	m := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	m.Set(0, 0, White)
+	tests := []*struct {
+		mode PixelMode
+		want byte
+	}{
+		{OneBit, 0b1000_0000},
+		{TwoBit, 0b1100_0000},
+	}
+
+	for _, test := range tests {
+		var b bytes.Buffer
+		t.Logf(`Testing mode %08b`, test.mode)
+		Encode(&b, m, test.mode)
+
+		byteSlice := b.Bytes()
+		lastByte := byteSlice[len(byteSlice)-1]
+
+		if lastByte != test.want {
+			t.Errorf(`Last byte = %08b, want %08b`, lastByte, test.want)
+		}
+	}
+}
+
+// TestEncodeTooLargeDimension tests that Encode should fail when the image has
+// unsupported dimensions.
+func TestEncodeTooLargeDimension(t *testing.T) {
+	var b bytes.Buffer
+	m := image.NewRGBA(image.Rect(0, 0, 1<<16, 1))
+	want := DimensionsTooLargeError(1 << 16)
+
+	if err := Encode(&b, m, EightBit); err != want {
+		t.Fatalf(`err = %v, want %v`, err, want)
+	}
+}
+
+// TestEncodeUnsupportedMode tests that Encode should fail when a bad PixelMode
+// is passed.
+func TestEncodeUnsupportedMode(t *testing.T) {
+	var b bytes.Buffer
+	m := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	want := UnsupportedBitModeError(1)
+
+	if err := Encode(&b, m, 1); err != want {
+		t.Fatalf(`err = %v, want %v`, err, want)
+	}
+}
+
 // FailDimensionHelper fails if the dimension is not the wanted value.
 func FailDimensionHelper(t *testing.T, b *bytes.Buffer, dimension, byteSignificance string, want byte) {
 	t.Helper()

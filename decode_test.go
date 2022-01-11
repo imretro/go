@@ -352,12 +352,66 @@ func TestDecodeWithCustomModel(t *testing.T) {
 }
 
 // TestDecodeMissingModel tests that an image cannot be decoded when the model
-// is missing.
+// is missing or the pixel mode is not supported (and therefore doesn't have a
+// model).
 func TestDecodeMissingModel(t *testing.T) {
-	r := MakeImretroReader(0x00, nil, 1, 1, []byte{0})
-	_, err := Decode(r, ModelMap{})
+	var r io.Reader
+	var err error
+
+	r = MakeImretroReader(0x00, nil, 1, 1, []byte{0})
+	_, err = Decode(r, ModelMap{})
 	if want := MissingModelError(0); err != want {
-		t.Fatalf(`err = %v, want %v`, err, want)
+		t.Errorf(`err = %v, want %v`, err, want)
+	}
+
+	r = MakeImretroReader(0b1110_0000, nil, 1, 1, []byte{0})
+	_, err = DecodeConfig(r, nil)
+	if want := MissingModelError(0b1100_0000); err != want {
+		t.Errorf(`err = %v, want %v`, err, want)
+	}
+}
+
+// TestDecodeReaderError tests that a reader error would be returned if it
+// occurs.
+func TestDecodeReaderError(t *testing.T) {
+	var r io.Reader
+	var err error
+
+	r = bytes.NewBuffer([]byte{})
+	if _, err = DecodeConfig(r, nil); err == nil {
+		t.Errorf(`err = nil`)
+	}
+
+	r = io.LimitReader(MakeImretroReader(EightBit, nil, 1, 1, []byte{0}), 10)
+	if _, err = DecodeConfig(r, nil); err == nil {
+		t.Errorf(`err = nil`)
+	}
+
+	r = errorReader{}
+	if _, err = decode1bitModel(r); err == nil {
+		t.Errorf(`err = nil`)
+	}
+	if _, err = decode2bitModel(r); err == nil {
+		t.Errorf(`err = nil`)
+	}
+	if _, err = decode8bitModel(r); err == nil {
+		t.Errorf(`err = nil`)
+	}
+
+	r = &errorLimitReader{
+		&io.LimitedReader{MakeImretroReader(EightBit, nil, 10, 10, make([]byte, 100)), 50},
+	}
+	if _, err = Decode(r, nil); err == nil {
+		t.Errorf(`err = nil`)
+	}
+}
+
+// TestDecodeError tests that the proper string representation of a failure to
+// decode is returned.
+func TestDecodeError(t *testing.T) {
+	err := DecodeError("Failed!")
+	if s := err.Error(); s != "Failed!" {
+		t.Fatalf(`Error() = %q, want "Failed!"`, s)
 	}
 }
 
