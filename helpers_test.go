@@ -1,6 +1,7 @@
 package imretro
 
 import (
+	"errors"
 	"image/color"
 	"testing"
 )
@@ -32,4 +33,19 @@ func CompareColors(t *testing.T, actual, want color.Color) {
 type channelComparison struct {
 	name         string
 	actual, want uint32
+}
+
+// CappedWriter is a writer with a fixed capacity.
+type cappedWriter struct {
+	len int
+	cap int
+}
+
+func (w *cappedWriter) Write(p []byte) (n int, err error) {
+	n = len(p)
+	w.len += n
+	if w.len > w.cap {
+		err = errors.New("Max capacity")
+	}
+	return
 }

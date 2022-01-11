@@ -177,6 +177,29 @@ func TestEncode8BitPixels(t *testing.T) {
 	}
 }
 
+// TestEncodeWriteFailures tests that encode will return errors when writing
+// fails.
+func TestEncodeWriteFailures(t *testing.T) {
+	tests := []*struct {
+		byteCount int
+		expect    string
+	}{
+		{0, "failure to write signature"},
+		{7, "failure to write mode"},
+		{8, "failure to write dimensions"},
+		{12, "failure to write palette"},
+	}
+	m := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	for i, test := range tests {
+		t.Logf(`Test %d`, i)
+		b := &cappedWriter{cap: test.byteCount}
+
+		if err := Encode(b, m, OneBit); err == nil {
+			t.Error(`err = nil`)
+		}
+	}
+}
+
 // TestEncodeTooLargeDimension tests that Encode should fail when the image has
 // unsupported dimensions.
 func TestEncodeTooLargeDimension(t *testing.T) {
