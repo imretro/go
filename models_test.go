@@ -10,3 +10,13 @@ func TestModelConvertNoColor(t *testing.T) {
 	c := model.Convert(White)
 	CompareColors(t, c, NoColor)
 }
+
+// TestMissingModelError tests that the correct string representation is
+// returned.
+func TestMissingModelError(t *testing.T) {
+	err := MissingModelError(0b11)
+	want := "No model for pixel mode 11"
+	if s := err.Error(); s != want {
+		t.Fatalf(`Error() = %q, want %q`, s, want)
+	}
+}
