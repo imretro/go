@@ -352,12 +352,22 @@ func TestDecodeWithCustomModel(t *testing.T) {
 }
 
 // TestDecodeMissingModel tests that an image cannot be decoded when the model
-// is missing.
+// is missing or the pixel mode is not supported (and therefore doesn't have a
+// model).
 func TestDecodeMissingModel(t *testing.T) {
-	r := MakeImretroReader(0x00, nil, 1, 1, []byte{0})
-	_, err := Decode(r, ModelMap{})
+	var r io.Reader
+	var err error
+
+	r = MakeImretroReader(0x00, nil, 1, 1, []byte{0})
+	_, err = Decode(r, ModelMap{})
 	if want := MissingModelError(0); err != want {
-		t.Fatalf(`err = %v, want %v`, err, want)
+		t.Errorf(`err = %v, want %v`, err, want)
+	}
+
+	r = MakeImretroReader(0b1110_0000, nil, 1, 1, []byte{0})
+	_, err = DecodeConfig(r, nil)
+	if want := MissingModelError(0b1100_0000); err != want {
+		t.Errorf(`err = %v, want %v`, err, want)
 	}
 }
 
