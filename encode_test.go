@@ -177,6 +177,18 @@ func TestEncode8BitPixels(t *testing.T) {
 	}
 }
 
+// TestEncodeTooLargeDimension tests that Encode should fail when the image has
+// unsupported dimensions.
+func TestEncodeTooLargeDimension(t *testing.T) {
+	var b bytes.Buffer
+	m := image.NewRGBA(image.Rect(0, 0, 1<<16, 1))
+	want := DimensionsTooLargeError(1 << 16)
+
+	if err := Encode(&b, m, EightBit); err != want {
+		t.Fatalf(`err = %v, want %v`, err, want)
+	}
+}
+
 // FailDimensionHelper fails if the dimension is not the wanted value.
 func FailDimensionHelper(t *testing.T, b *bytes.Buffer, dimension, byteSignificance string, want byte) {
 	t.Helper()
