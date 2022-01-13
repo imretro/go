@@ -40,7 +40,7 @@ func TestEncode1BitPalette(t *testing.T) {
 	Encode1Bit(t, &b, 320, 240)
 
 	t.Log("Skipping to palette")
-	b.Next(12)
+	b.Next(11)
 
 	channels := []string{"r", "g", "b", "a"}
 	for i, want := range []byte{0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF} {
@@ -56,7 +56,7 @@ func TestEncode2BitPalette(t *testing.T) {
 	Encode2Bit(t, &b, 320, 240)
 
 	t.Log("Skipping to palette")
-	b.Next(12)
+	b.Next(11)
 
 	channels := []string{"r", "g", "b", "a"}
 	bytes := []byte{
@@ -78,7 +78,7 @@ func TestEncode1BitPixels(t *testing.T) {
 	Encode1Bit(t, &b, 10, 5)
 
 	t.Log("Skipping to pixels")
-	b.Next(12)
+	b.Next(11)
 	b.Next(8)
 
 	FailByteHelper(t, &b, 0b0000_1111)
@@ -111,7 +111,7 @@ func TestEncode2BitPixels(t *testing.T) {
 	Encode2Bit(t, &b, 10, 5)
 
 	t.Log("skipping to pixels")
-	b.Next(12)
+	b.Next(11)
 	b.Next(16)
 
 	for i := 0; i < 16/4; i++ {
@@ -145,7 +145,7 @@ func TestEncode8BitPixels(t *testing.T) {
 	Encode8Bit(t, &b, 10, 5)
 
 	t.Log("skipping to pixels")
-	b.Next(12)
+	b.Next(11)
 	b.Next(1024)
 
 	for i := 0; i < 16/4; i++ {
@@ -187,7 +187,7 @@ func TestEncodeWriteFailures(t *testing.T) {
 		{0, "failure to write signature"},
 		{7, "failure to write mode"},
 		{8, "failure to write dimensions"},
-		{12, "failure to write palette"},
+		{11, "failure to write palette"},
 	}
 	m := image.NewRGBA(image.Rect(0, 0, 1, 1))
 	for i, test := range tests {
