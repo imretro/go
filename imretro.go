@@ -28,7 +28,7 @@ const WithPalette byte = 1 << (7 - PaletteIndex)
 
 // MaximumDimension is the maximum size of an image's boundary in the imretro
 // format.
-const MaximumDimension int = 0xFF_FF
+const MaximumDimension int = 0xFFF
 
 // UnsupportedBitModeError should be returned when an unexpected number
 // of bits is received.
