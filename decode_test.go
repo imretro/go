@@ -6,6 +6,8 @@ import (
 	"image/color"
 	"io"
 	"testing"
+
+	"github.com/spenserblack/go-byteutils"
 )
 
 // TestPassCheckHeader tests that a reader starting with "IMRETRO" bytes will
@@ -417,13 +419,19 @@ func TestDecodeError(t *testing.T) {
 
 // MakeImretroReader makes a 1-bit imretro reader.
 func MakeImretroReader(mode byte, palette [][]byte, width, height uint16, pixels []byte) *bytes.Buffer {
+	w := [2]byte{byte((width & 0xF00) >> 8), byte(width & 0xFF)}
+	h := [2]byte{byte((height & 0xF00) >> 8), byte(height & 0xFF)}
+	dimensions := [3]byte{
+		(w[0] << 4) | byteutils.SliceL(w[1], 0, 4),
+		(byteutils.SliceR(w[1], 0, 4) << 4) | byteutils.SliceL(h[0], 0, 4),
+		h[1],
+	}
 	b := bytes.NewBuffer([]byte{
 		// signature/magic bytes
 		'I', 'M', 'R', 'E', 'T', 'R', 'O',
 		// Mode byte (8-bit, in-file palette)
 		mode,
-		byte(width >> 8), byte(width & 0xFF),
-		byte(height >> 8), byte(height & 0xFF),
+		dimensions[0], dimensions[1], dimensions[2],
 	})
 	for _, color := range palette {
 		b.Write(color)
