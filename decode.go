@@ -6,6 +6,8 @@ import (
 	"io"
 
 	"github.com/spenserblack/go-byteutils"
+
+	"github.com/imretro/go/internal/util"
 )
 
 // ImretroSignature is the "magic string" used for identifying an imretro file.
@@ -59,14 +61,14 @@ func DecodeConfig(r io.Reader, customModels ModelMap) (image.Config, error) {
 	bitsPerPixel := mode & (0b11 << bitsPerPixelIndex)
 	hasPalette := byteutils.BitAsBool(byteutils.GetL(mode, PaletteIndex))
 
-	buff = make([]byte, 4)
+	buff = make([]byte, 3)
 	_, err = io.ReadFull(r, buff)
 	if err != nil {
 		return image.Config{}, err
 	}
 
-	width := byteutils.ToUint16(buff[0:2], byteutils.LittleEndian)
-	height := byteutils.ToUint16(buff[2:4], byteutils.LittleEndian)
+	width, height := util.DimensionsFrom3Bytes(buff[0], buff[1], buff[2])
+
 
 	var model color.Model
 	if !hasPalette {
@@ -88,7 +90,7 @@ func DecodeConfig(r io.Reader, customModels ModelMap) (image.Config, error) {
 		}
 	}
 
-	return image.Config{model, int(width), int(height)}, err
+	return image.Config{model, width, height}, err
 }
 
 func decode1bitModel(r io.Reader) (color.Model, error) {
