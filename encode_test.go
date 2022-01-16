@@ -33,6 +33,28 @@ func TestEncode1BitHeader(t *testing.T) {
 	FailDimensionHelper(t, &b, "y", "Least", 240)
 }
 
+// TestEncodeDimensions checks that the proper bytes are encoded for 2 12-bit
+// dimensions.
+func TestEncodeDimensions(t *testing.T) {
+	var b bytes.Buffer
+	Encode1Bit(t, &b, 640, 480)
+
+	// NOTE Skip signature & bit mode
+	b.Next(8)
+
+	dimensions := make([]byte, 3)
+	if _, err := b.Read(dimensions); err != nil {
+		t.Fatalf(`err = %v, want nil`, err)
+	}
+
+	tests := []byte{0x28, 0x01, 0xE0}
+	for i, want := range tests {
+		if actual := dimensions[i]; actual != want {
+			t.Errorf(`byte %d = %08b, want %08b`, i, actual, want)
+		}
+	}
+}
+
 // TestEncode1BitPalette checks that a black & white palette would be encoded
 // to a 1-bit imretro file.
 func TestEncode1BitPalette(t *testing.T) {
