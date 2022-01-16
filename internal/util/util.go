@@ -14,3 +14,13 @@ func DimensionsAs3Bytes(width uint16, height uint16) (dimensions [3]byte) {
 	dimensions[2] = byte(height & 0xFF)
 	return
 }
+
+// DimensionsFrom3Bytes converts 3 bytes to width and height, where width
+// and height are both 12 bit numbers.
+func DimensionsFrom3Bytes(upper, middle, low byte) (width, height int) {
+	width |= int(upper) << 4
+	width |= int(middle) >> 4
+	height |= int(middle & 0x0F) << 8
+	height |= int(low)
+	return
+}
