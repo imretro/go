@@ -231,8 +231,8 @@ func TestEncodeTinyImages(t *testing.T) {
 // unsupported dimensions.
 func TestEncodeTooLargeDimension(t *testing.T) {
 	var b bytes.Buffer
-	m := image.NewRGBA(image.Rect(0, 0, 1<<16, 1))
-	want := DimensionsTooLargeError(1 << 16)
+	m := image.NewRGBA(image.Rect(0, 0, 1<<12, 1))
+	want := DimensionsTooLargeError(1 << 12)
 
 	if err := Encode(&b, m, EightBit); err != want {
 		t.Fatalf(`err = %v, want %v`, err, want)
