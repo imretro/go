@@ -14,7 +14,7 @@ import (
 // pass.
 func TestPassCheckHeader(t *testing.T) {
 	buff := make([]byte, 8)
-	r := MakeImretroReader(0b1010_0000, nil, 0, 0, nil)
+	r := MakeImretroReader(0b1010_0001, nil, 0, 0, nil)
 	mode, err := checkHeader(r, buff)
 	if err != nil {
 		t.Fatalf(`err = %v, want nil`, err)
@@ -53,7 +53,7 @@ func TestFailCheckHeader(t *testing.T) {
 func TestDecode1BitNoPalette(t *testing.T) {
 	const width, height int = 320, 240
 	var pixels = make([]byte, width*height)
-	r := MakeImretroReader(0x00, [][]byte{}, uint16(320), uint16(240), pixels)
+	r := MakeImretroReader(0x01, [][]byte{}, uint16(320), uint16(240), pixels)
 
 	config, err := DecodeConfig(r, nil)
 
@@ -83,7 +83,7 @@ func TestDecode1BitNoPalette(t *testing.T) {
 func TestDecode2BitNoPalette(t *testing.T) {
 	const width, height int = 320, 240
 	var pixels = make([]byte, width*height)
-	r := MakeImretroReader(0x40, [][]byte{}, uint16(320), uint16(240), pixels)
+	r := MakeImretroReader(0x41, [][]byte{}, uint16(320), uint16(240), pixels)
 
 	config, err := DecodeConfig(r, nil)
 
@@ -118,7 +118,7 @@ func TestDecode2BitNoPalette(t *testing.T) {
 func TestDecode8BitNoPalette(t *testing.T) {
 	const width, height int = 320, 240
 	var pixels = make([]byte, width*height)
-	r := MakeImretroReader(0x80, [][]byte{}, uint16(320), uint16(240), pixels)
+	r := MakeImretroReader(0x81, [][]byte{}, uint16(320), uint16(240), pixels)
 
 	config, err := DecodeConfig(r, nil)
 
@@ -153,7 +153,7 @@ func TestDecode1BitPalette(t *testing.T) {
 		{0x00, 0xFF, 0x00, 0xFF},
 		{0xEF, 0xFF, 0x00, 0xFF},
 	}
-	r := MakeImretroReader(0x20, palette, 2, 2, make([]byte, 1))
+	r := MakeImretroReader(0x21, palette, 2, 2, make([]byte, 1))
 
 	config, err := DecodeConfig(r, nil)
 
@@ -184,7 +184,7 @@ func TestDecode2BitPalette(t *testing.T) {
 		{0x00, 0x00, 0xFF, 0xFF},
 		{0x00, 0x00, 0x00, 0x00},
 	}
-	r := MakeImretroReader(0x60, palette, 2, 2, make([]byte, 4))
+	r := MakeImretroReader(0x61, palette, 2, 2, make([]byte, 4))
 
 	config, err := DecodeConfig(r, nil)
 
@@ -220,7 +220,7 @@ func TestDecode8BitPalette(t *testing.T) {
 		reversedPalette = append(reversedPalette, []byte{r, g, b, a})
 	}
 
-	r := MakeImretroReader(0xA0, reversedPalette, 2, 2, make([]byte, 4))
+	r := MakeImretroReader(0xA1, reversedPalette, 2, 2, make([]byte, 4))
 
 	config, err := DecodeConfig(r, nil)
 
@@ -245,7 +245,7 @@ func TestDecode8BitPalette(t *testing.T) {
 
 // TestDecode1BitImage tests that a 1-bit image would be properly decoded.
 func TestDecode1BitImage(t *testing.T) {
-	r := MakeImretroReader(0x00, [][]byte{}, 5, 2, []byte{0b10010_100, 0b01_000000})
+	r := MakeImretroReader(0x01, [][]byte{}, 5, 2, []byte{0b10010_100, 0b01_000000})
 	i, err := Decode(r, nil)
 	if err != nil {
 		t.Fatalf(`err = %v, want nil`, err)
@@ -276,7 +276,7 @@ func TestDecode1BitImage(t *testing.T) {
 // TestDecode2BitImage tests that a 2-bit image would be properly decoded.
 func TestDecode2BitImage(t *testing.T) {
 	pixels := []byte{0b00011011, 0b11_100100, 0b1101_0000}
-	r := MakeImretroReader(0x40, nil, 5, 2, pixels)
+	r := MakeImretroReader(0x41, nil, 5, 2, pixels)
 	i, err := Decode(r, nil)
 	if err != nil {
 		t.Fatalf(`err = %v, want nil`, err)
@@ -314,7 +314,7 @@ func TestDecode8BitImage(t *testing.T) {
 		0x00, 0xFF, 0xC0, 0xC3, 0xCC, // transparent, white, black, red, green
 		0xF0, 0xCF, 0xF3, 0xFC, 0xAA, // blue, yellow, magenta, cyan, 75% light gray
 	}
-	r := MakeImretroReader(0x80, nil, 5, 2, pixels)
+	r := MakeImretroReader(0x81, nil, 5, 2, pixels)
 	i, err := Decode(r, nil)
 	if err != nil {
 		t.Fatalf(`err = %v, want nil`, err)
@@ -341,7 +341,7 @@ func TestDecode8BitImage(t *testing.T) {
 // model(s) will be used for the image.
 func TestDecodeWithCustomModel(t *testing.T) {
 	pixels := []byte{0b0100_0000}
-	r := MakeImretroReader(0x00, nil, 2, 1, pixels)
+	r := MakeImretroReader(0x01, nil, 2, 1, pixels)
 	off := color.Alpha{0}
 	on := color.RGBA{0, 0xFF, 0, 0xFF}
 	i, err := Decode(r, ModelMap{OneBit: NewOneBitColorModel(off, on)})
@@ -360,13 +360,13 @@ func TestDecodeMissingModel(t *testing.T) {
 	var r io.Reader
 	var err error
 
-	r = MakeImretroReader(0x00, nil, 1, 1, []byte{0})
+	r = MakeImretroReader(0x01, nil, 1, 1, []byte{0})
 	_, err = Decode(r, ModelMap{})
 	if want := MissingModelError(0); err != want {
 		t.Errorf(`err = %v, want %v`, err, want)
 	}
 
-	r = MakeImretroReader(0b1110_0000, nil, 1, 1, []byte{0})
+	r = MakeImretroReader(0b1110_0001, nil, 1, 1, []byte{0})
 	_, err = DecodeConfig(r, nil)
 	if want := MissingModelError(0b1100_0000); err != want {
 		t.Errorf(`err = %v, want %v`, err, want)
