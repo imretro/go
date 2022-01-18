@@ -27,10 +27,17 @@ func TestEncode1BitHeader(t *testing.T) {
 		}
 	}
 
-	FailDimensionHelper(t, &b, "x", "Most", 1)
-	FailDimensionHelper(t, &b, "x", "Least", 64)
-	FailDimensionHelper(t, &b, "y", "Most", 0)
-	FailDimensionHelper(t, &b, "y", "Least", 240)
+	dimensionTests := []byte{0x14, 0x00, 0xF0}
+
+	for i, want := range dimensionTests {
+		actual, err := b.ReadByte()
+		if err != nil {
+			t.Fatalf(`err = %v, want nil`, err)
+		}
+		if actual != want {
+			t.Errorf(`dimension byte %d = %02X, want %02X`, i, actual, want)
+		}
+	}
 }
 
 // TestEncodeDimensions checks that the proper bytes are encoded for 2 12-bit
@@ -270,24 +277,6 @@ func TestEncodeUnsupportedMode(t *testing.T) {
 
 	if err := Encode(&b, m, 1); err != want {
 		t.Fatalf(`err = %v, want %v`, err, want)
-	}
-}
-
-// FailDimensionHelper fails if the dimension is not the wanted value.
-func FailDimensionHelper(t *testing.T, b *bytes.Buffer, dimension, byteSignificance string, want byte) {
-	t.Helper()
-	actual, err := b.ReadByte()
-	if err != nil {
-		panic(err)
-	}
-
-	if actual != want {
-		t.Errorf(
-			`%s significant byte of %s dimension = %d (%08b), want %d (%08b)`,
-			byteSignificance, dimension,
-			actual, actual,
-			want, want,
-		)
 	}
 }
 
