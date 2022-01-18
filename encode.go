@@ -6,6 +6,8 @@ import (
 	"io"
 
 	"github.com/spenserblack/go-byteutils"
+
+	"github.com/imretro/go/internal/util"
 )
 
 // Encode writes the image m to w in imretro format.
@@ -31,14 +33,15 @@ func Encode(w io.Writer, m image.Image, pixelMode PixelMode) error {
 
 	bounds := m.Bounds()
 	width, height := bounds.Dx(), bounds.Dy()
-
 	for _, d := range []int{width, height} {
 		if d > MaximumDimension {
 			return DimensionsTooLargeError(d)
 		}
-		if _, err := w.Write(byteutils.BytesFromUint16(uint16(d), byteutils.LittleEndian)); err != nil {
-			return err
-		}
+	}
+	dimensions := util.DimensionsAs3Bytes(uint16(width), uint16(height))
+
+	if _, err := w.Write(dimensions[:]); err != nil {
+		return err
 	}
 
 	if err := writePalette(w, DefaultModelMap[pixelMode].(ColorModel)); err != nil {

@@ -12,7 +12,12 @@ import (
 
 // ImgBytes declares a 2x2 image with no in-file palette, 1 bit per pixel, and
 // an alternating white/black checkerboard pattern.
-var ImgBytes = []byte{'I', 'M', 'R', 'E', 'T', 'R', 'O', 0x00, 0, 2, 0, 2, 0b1001_0000}
+var ImgBytes = []byte{
+	'I', 'M', 'R', 'E', 'T', 'R', 'O', // Signature
+	0x00, // Mode
+	0x00, 0x20, 0x02, // Width & Height (2 12-bit numbers)
+	0b1001_0000, // Pixels (on, off, off, on, ignored)
+}
 
 func Example_decode() {
 	var reader io.Reader = bytes.NewBuffer(ImgBytes)

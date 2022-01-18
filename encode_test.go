@@ -27,10 +27,39 @@ func TestEncode1BitHeader(t *testing.T) {
 		}
 	}
 
-	FailDimensionHelper(t, &b, "x", "Most", 1)
-	FailDimensionHelper(t, &b, "x", "Least", 64)
-	FailDimensionHelper(t, &b, "y", "Most", 0)
-	FailDimensionHelper(t, &b, "y", "Least", 240)
+	dimensionTests := []byte{0x14, 0x00, 0xF0}
+
+	for i, want := range dimensionTests {
+		actual, err := b.ReadByte()
+		if err != nil {
+			t.Fatalf(`err = %v, want nil`, err)
+		}
+		if actual != want {
+			t.Errorf(`dimension byte %d = %02X, want %02X`, i, actual, want)
+		}
+	}
+}
+
+// TestEncodeDimensions checks that the proper bytes are encoded for 2 12-bit
+// dimensions.
+func TestEncodeDimensions(t *testing.T) {
+	var b bytes.Buffer
+	Encode1Bit(t, &b, 640, 480)
+
+	// NOTE Skip signature & bit mode
+	b.Next(8)
+
+	dimensions := make([]byte, 3)
+	if _, err := b.Read(dimensions); err != nil {
+		t.Fatalf(`err = %v, want nil`, err)
+	}
+
+	tests := []byte{0x28, 0x01, 0xE0}
+	for i, want := range tests {
+		if actual := dimensions[i]; actual != want {
+			t.Errorf(`byte %d = %08b, want %08b`, i, actual, want)
+		}
+	}
 }
 
 // TestEncode1BitPalette checks that a black & white palette would be encoded
@@ -40,7 +69,7 @@ func TestEncode1BitPalette(t *testing.T) {
 	Encode1Bit(t, &b, 320, 240)
 
 	t.Log("Skipping to palette")
-	b.Next(12)
+	b.Next(11)
 
 	channels := []string{"r", "g", "b", "a"}
 	for i, want := range []byte{0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF} {
@@ -56,7 +85,7 @@ func TestEncode2BitPalette(t *testing.T) {
 	Encode2Bit(t, &b, 320, 240)
 
 	t.Log("Skipping to palette")
-	b.Next(12)
+	b.Next(11)
 
 	channels := []string{"r", "g", "b", "a"}
 	bytes := []byte{
@@ -78,7 +107,7 @@ func TestEncode1BitPixels(t *testing.T) {
 	Encode1Bit(t, &b, 10, 5)
 
 	t.Log("Skipping to pixels")
-	b.Next(12)
+	b.Next(11)
 	b.Next(8)
 
 	FailByteHelper(t, &b, 0b0000_1111)
@@ -111,7 +140,7 @@ func TestEncode2BitPixels(t *testing.T) {
 	Encode2Bit(t, &b, 10, 5)
 
 	t.Log("skipping to pixels")
-	b.Next(12)
+	b.Next(11)
 	b.Next(16)
 
 	for i := 0; i < 16/4; i++ {
@@ -145,7 +174,7 @@ func TestEncode8BitPixels(t *testing.T) {
 	Encode8Bit(t, &b, 10, 5)
 
 	t.Log("skipping to pixels")
-	b.Next(12)
+	b.Next(11)
 	b.Next(1024)
 
 	for i := 0; i < 16/4; i++ {
@@ -187,7 +216,7 @@ func TestEncodeWriteFailures(t *testing.T) {
 		{0, "failure to write signature"},
 		{7, "failure to write mode"},
 		{8, "failure to write dimensions"},
-		{12, "failure to write palette"},
+		{11, "failure to write palette"},
 	}
 	m := image.NewRGBA(image.Rect(0, 0, 1, 1))
 	for i, test := range tests {
@@ -231,8 +260,8 @@ func TestEncodeTinyImages(t *testing.T) {
 // unsupported dimensions.
 func TestEncodeTooLargeDimension(t *testing.T) {
 	var b bytes.Buffer
-	m := image.NewRGBA(image.Rect(0, 0, 1<<16, 1))
-	want := DimensionsTooLargeError(1 << 16)
+	m := image.NewRGBA(image.Rect(0, 0, 1<<12, 1))
+	want := DimensionsTooLargeError(1 << 12)
 
 	if err := Encode(&b, m, EightBit); err != want {
 		t.Fatalf(`err = %v, want %v`, err, want)
@@ -248,24 +277,6 @@ func TestEncodeUnsupportedMode(t *testing.T) {
 
 	if err := Encode(&b, m, 1); err != want {
 		t.Fatalf(`err = %v, want %v`, err, want)
-	}
-}
-
-// FailDimensionHelper fails if the dimension is not the wanted value.
-func FailDimensionHelper(t *testing.T, b *bytes.Buffer, dimension, byteSignificance string, want byte) {
-	t.Helper()
-	actual, err := b.ReadByte()
-	if err != nil {
-		panic(err)
-	}
-
-	if actual != want {
-		t.Errorf(
-			`%s significant byte of %s dimension = %d (%08b), want %d (%08b)`,
-			byteSignificance, dimension,
-			actual, actual,
-			want, want,
-		)
 	}
 }
 
