@@ -69,7 +69,6 @@ func DecodeConfig(r io.Reader, customModels ModelMap) (image.Config, error) {
 
 	width, height := util.DimensionsFrom3Bytes(buff[0], buff[1], buff[2])
 
-
 	var model color.Model
 	if !hasPalette {
 		var ok bool
@@ -98,7 +97,10 @@ func decode1bitModel(r io.Reader) (color.Model, error) {
 	if _, err := io.ReadFull(r, buff); err != nil {
 		return nil, err
 	}
-	model := NewOneBitColorModel(ColorFromBytes(buff[:4]), ColorFromBytes(buff[4:]))
+	model := NewOneBitColorModel(
+		util.ColorFromBytes(buff[:4]),
+		util.ColorFromBytes(buff[4:]),
+	)
 
 	return model, nil
 }
@@ -109,10 +111,10 @@ func decode2bitModel(r io.Reader) (color.Model, error) {
 		return nil, err
 	}
 	model := NewTwoBitColorModel(
-		ColorFromBytes(buff[:4]),
-		ColorFromBytes(buff[4:8]),
-		ColorFromBytes(buff[8:12]),
-		ColorFromBytes(buff[12:]),
+		util.ColorFromBytes(buff[:4]),
+		util.ColorFromBytes(buff[4:8]),
+		util.ColorFromBytes(buff[8:12]),
+		util.ColorFromBytes(buff[12:]),
 	)
 
 	return model, nil
@@ -126,7 +128,7 @@ func decode8bitModel(r io.Reader) (color.Model, error) {
 		if _, err := io.ReadFull(r, buff); err != nil {
 			return nil, err
 		}
-		colors = append(colors, ColorFromBytes(buff))
+		colors = append(colors, util.ColorFromBytes(buff))
 	}
 
 	return colors, nil

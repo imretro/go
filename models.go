@@ -6,6 +6,8 @@ import (
 	"image/color"
 
 	"github.com/spenserblack/go-byteutils"
+
+	"github.com/imretro/go/internal/util"
 )
 
 // ModelMap maps bit modes to color models.
@@ -63,7 +65,7 @@ func NewTwoBitColorModel(off, light, strong, full color.Color) ColorModel {
 
 // Index returns the index of the palette color.
 func (model ColorModel) Index(c color.Color) uint8 {
-	r, g, b, a := ColorAsBytes(c)
+	r, g, b, a := util.ColorAsBytes(c)
 	brightness := r | g | b
 	isBright := (brightness >= 128) && (a >= 128)
 	switch model.PixelMode() {
@@ -105,7 +107,7 @@ func init() {
 			channel |= (channel << 6) | (channel << 4) | (channel << 2)
 			rgba[ci] = channel
 		}
-		c := ColorFromBytes(rgba)
+		c := util.ColorFromBytes(rgba)
 		Default8BitColorModel[i] = c
 	}
 }

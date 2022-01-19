@@ -124,7 +124,7 @@ func encodeEightBit(w io.Writer, m image.Image) error {
 
 // WriteColor writes a color as 4 bytes to a Writer.
 func writeColor(w io.Writer, c color.Color) error {
-	r, g, b, a := ColorAsBytes(c)
+	r, g, b, a := util.ColorAsBytes(c)
 	_, err := w.Write([]byte{r, g, b, a})
 	return err
 }
