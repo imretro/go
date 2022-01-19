@@ -176,6 +176,33 @@ func TestDecode1BitPalette(t *testing.T) {
 	}
 }
 
+// TestDecode1BitMinPalette tests that a 1-bit palette using 2-bit color
+// channels would be properly decoded.
+func TestDecode1BitMinPalette(t *testing.T) {
+	palette := [][]byte{{0x33}, {0xB3}}
+	r := MakeImretroReader(0x20, palette, 2, 2, make([]byte, 1))
+
+	config, err := DecodeConfig(r, nil)
+
+	if err != nil {
+		t.Fatalf(`err = %v, want nil`, err)
+	}
+
+	inputAndWant := [][2]color.Color{
+		{Black, color.RGBA{0x00, 0xFF, 0x00, 0xFF}},
+		{White, color.RGBA{0xAA, 0xFF, 0x00, 0xFF}},
+	}
+
+	for _, colors := range inputAndWant {
+		input := colors[0]
+		want := colors[1]
+
+		t.Logf(`Comparing conversion of %v`, input)
+		actual := config.ColorModel.Convert(input)
+		CompareColors(t, actual, want)
+	}
+}
+
 // TestDecode2BitPalette tests that a 2-bit palette would be properly decoded.
 func TestDecode2BitPalette(t *testing.T) {
 	palette := [][]byte{
