@@ -20,7 +20,17 @@ func DimensionsAs3Bytes(width uint16, height uint16) (dimensions [3]byte) {
 func DimensionsFrom3Bytes(upper, middle, low byte) (width, height int) {
 	width |= int(upper) << 4
 	width |= int(middle) >> 4
-	height |= int(middle & 0x0F) << 8
+	height |= int(middle&0x0F) << 8
 	height |= int(low)
 	return
+}
+
+// FillBytes fills duplicates the last n bytes to fill the whole byte.
+func FillBytes(b []byte, n byte) {
+	for i := range b {
+		bits := byteutils.SliceR(b[i], 0, n)
+		for offset := 0; offset < 8; offset += int(n) {
+			b[i] |= bits << offset
+		}
+	}
 }
