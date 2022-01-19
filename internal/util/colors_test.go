@@ -21,3 +21,31 @@ func TestColorAsBytes(t *testing.T) {
 		t.Fatalf(`a = %d, want 0`, a)
 	}
 }
+
+// TestColorFromBytes tests that a color can be created from 4 bytes.
+func TestColorFromBytes(t *testing.T) {
+	tests := []struct {
+		color string
+		b     [4]byte
+		want  map[rune]uint32
+	}{
+		{
+			"white", [4]byte{0xFF, 0xFF, 0xFF, 0xFF},
+			map[rune]uint32{'r': 0xFFFF, 'g': 0xFFFF, 'b': 0xFFFF, 'a': 0xFFFF},
+		},
+		{
+			"black", [4]byte{0, 0, 0, 0},
+			map[rune]uint32{'r': 0, 'g': 0, 'b': 0, 'a': 0},
+		},
+	}
+
+	for _, tt := range tests {
+		r, g, b, a := ColorFromBytes(tt.b[:]).RGBA()
+		actual := map[rune]uint32{'r': r, 'g': g, 'b': b, 'a': a}
+		for k, v := range actual {
+			if w := tt.want[k]; v != w {
+				t.Errorf(`%s color channel %c = %04X, want %04X`, tt.color, k, v, w)
+			}
+		}
+	}
+}
