@@ -69,7 +69,6 @@ func DecodeConfig(r io.Reader, customModels ModelMap) (image.Config, error) {
 
 	width, height := util.DimensionsFrom3Bytes(buff[0], buff[1], buff[2])
 
-
 	var model color.Model
 	if !hasPalette {
 		var ok bool
@@ -104,7 +103,7 @@ func decodeModel(r io.Reader, size int) (color.Model, error) {
 		if _, err := io.ReadFull(r, buff); err != nil {
 			return nil, err
 		}
-		model[i] = ColorFromBytes(buff)
+		model[i] = util.ColorFromBytes(buff)
 	}
 	return model, nil
 }

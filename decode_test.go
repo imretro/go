@@ -243,7 +243,7 @@ func TestDecode8BitPalette(t *testing.T) {
 	last := len(Default8BitColorModel) - 1
 	for i := range Default8BitColorModel {
 		c := Default8BitColorModel[last-i]
-		r, g, b, a := ColorAsBytes(c)
+		r, g, b, a := util.ColorAsBytes(c)
 		reversedPalette = append(reversedPalette, []byte{r, g, b, a})
 	}
 
@@ -417,13 +417,7 @@ func TestDecodeReaderError(t *testing.T) {
 	}
 
 	r = errorReader{}
-	if _, err = decode1bitModel(r); err == nil {
-		t.Errorf(`err = nil`)
-	}
-	if _, err = decode2bitModel(r); err == nil {
-		t.Errorf(`err = nil`)
-	}
-	if _, err = decode8bitModel(r); err == nil {
+	if _, err = decodeModel(r, 2); err == nil {
 		t.Errorf(`err = nil`)
 	}
 
