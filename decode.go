@@ -78,58 +78,35 @@ func DecodeConfig(r io.Reader, customModels ModelMap) (image.Config, error) {
 			err = MissingModelError(bitsPerPixel)
 		}
 	} else {
+		var modelSize int
 		switch bitsPerPixel {
 		case OneBit:
-			model, err = decode1bitModel(r)
+			modelSize = 1 << 1
 		case TwoBit:
-			model, err = decode2bitModel(r)
+			modelSize = 1 << 2
 		case EightBit:
-			model, err = decode8bitModel(r)
+			modelSize = 1 << 8
 		default:
-			err = MissingModelError(bitsPerPixel)
+			return image.Config{}, MissingModelError(bitsPerPixel)
 		}
+		model, err = decodeModel(r, modelSize)
 	}
 
 	return image.Config{model, width, height}, err
 }
 
-func decode1bitModel(r io.Reader) (color.Model, error) {
-	buff := make([]byte, 8)
-	if _, err := io.ReadFull(r, buff); err != nil {
-		return nil, err
-	}
-	model := NewOneBitColorModel(ColorFromBytes(buff[:4]), ColorFromBytes(buff[4:]))
-
-	return model, nil
-}
-
-func decode2bitModel(r io.Reader) (color.Model, error) {
-	buff := make([]byte, 16)
-	if _, err := io.ReadFull(r, buff); err != nil {
-		return nil, err
-	}
-	model := NewTwoBitColorModel(
-		ColorFromBytes(buff[:4]),
-		ColorFromBytes(buff[4:8]),
-		ColorFromBytes(buff[8:12]),
-		ColorFromBytes(buff[12:]),
-	)
-
-	return model, nil
-}
-
-func decode8bitModel(r io.Reader) (color.Model, error) {
-	colors := make(ColorModel, 0, 256)
+// DecodeModel will decode bytes into a ColorModel. The bytes decoded depend on
+// the length of the ColorModel.
+func decodeModel(r io.Reader, size int) (color.Model, error) {
+	model := make(ColorModel, size)
 	buff := make([]byte, 4)
-
-	for i := 0; i < cap(colors); i++ {
+	for i := range model {
 		if _, err := io.ReadFull(r, buff); err != nil {
 			return nil, err
 		}
-		colors = append(colors, ColorFromBytes(buff))
+		model[i] = ColorFromBytes(buff)
 	}
-
-	return colors, nil
+	return model, nil
 }
 
 // CheckHeader confirms the reader is an imretro image by checking the "magic bytes",
