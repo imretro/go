@@ -49,3 +49,27 @@ func TestColorFromBytes(t *testing.T) {
 		}
 	}
 }
+
+// TestColorFromBytesSingleByte tests that a single byte can be expanded to 4
+// colors.
+func TestColorFromBytesSingleByte(t *testing.T) {
+	tests := []struct {
+		b    byte
+		want map[rune]uint32
+	}{
+		{
+			0b00011011,
+			map[rune]uint32{'r': 0, 'g': 0x5555, 'b': 0xAAAA, 'a': 0xFFFF},
+		},
+	}
+
+	for _, tt := range tests {
+		r, g, b, a := ColorFromBytes([]byte{tt.b}).RGBA()
+		actual := map[rune]uint32{'r': r, 'g': g, 'b': b, 'a': a}
+		for k, v := range actual {
+			if w := tt.want[k]; v != w {
+				t.Errorf(`color channel %c = %04X, want %04X`, k, v, w)
+			}
+		}
+	}
+}

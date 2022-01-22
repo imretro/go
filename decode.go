@@ -88,7 +88,7 @@ func DecodeConfig(r io.Reader, customModels ModelMap) (image.Config, error) {
 		default:
 			return image.Config{}, MissingModelError(bitsPerPixel)
 		}
-		model, err = decodeModel(r, modelSize)
+		model, err = decodeModel(r, modelSize, mode&EightBitColors != 0)
 	}
 
 	return image.Config{model, width, height}, err
@@ -96,9 +96,13 @@ func DecodeConfig(r io.Reader, customModels ModelMap) (image.Config, error) {
 
 // DecodeModel will decode bytes into a ColorModel. The bytes decoded depend on
 // the length of the ColorModel.
-func decodeModel(r io.Reader, size int) (color.Model, error) {
+func decodeModel(r io.Reader, size int, accurateColors bool) (color.Model, error) {
 	model := make(ColorModel, size)
-	buff := make([]byte, 4)
+	buffSize := 1
+	if accurateColors {
+		buffSize = 4
+	}
+	buff := make([]byte, buffSize)
 	for i := range model {
 		if _, err := io.ReadFull(r, buff); err != nil {
 			return nil, err
