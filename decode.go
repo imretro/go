@@ -77,61 +77,39 @@ func DecodeConfig(r io.Reader, customModels ModelMap) (image.Config, error) {
 			err = MissingModelError(bitsPerPixel)
 		}
 	} else {
+		var modelSize int
 		switch bitsPerPixel {
 		case OneBit:
-			model, err = decode1bitModel(r)
+			modelSize = 1 << 1
 		case TwoBit:
-			model, err = decode2bitModel(r)
+			modelSize = 1 << 2
 		case EightBit:
-			model, err = decode8bitModel(r)
+			modelSize = 1 << 8
 		default:
-			err = MissingModelError(bitsPerPixel)
+			return image.Config{}, MissingModelError(bitsPerPixel)
 		}
+		model, err = decodeModel(r, modelSize, mode&EightBitColors != 0)
 	}
 
 	return image.Config{model, width, height}, err
 }
 
-func decode1bitModel(r io.Reader) (color.Model, error) {
-	buff := make([]byte, 8)
-	if _, err := io.ReadFull(r, buff); err != nil {
-		return nil, err
+// DecodeModel will decode bytes into a ColorModel. The bytes decoded depend on
+// the length of the ColorModel.
+func decodeModel(r io.Reader, size int, accurateColors bool) (color.Model, error) {
+	model := make(ColorModel, size)
+	buffSize := 1
+	if accurateColors {
+		buffSize = 4
 	}
-	model := NewOneBitColorModel(
-		util.ColorFromBytes(buff[:4]),
-		util.ColorFromBytes(buff[4:]),
-	)
-
-	return model, nil
-}
-
-func decode2bitModel(r io.Reader) (color.Model, error) {
-	buff := make([]byte, 16)
-	if _, err := io.ReadFull(r, buff); err != nil {
-		return nil, err
-	}
-	model := NewTwoBitColorModel(
-		util.ColorFromBytes(buff[:4]),
-		util.ColorFromBytes(buff[4:8]),
-		util.ColorFromBytes(buff[8:12]),
-		util.ColorFromBytes(buff[12:]),
-	)
-
-	return model, nil
-}
-
-func decode8bitModel(r io.Reader) (color.Model, error) {
-	colors := make(ColorModel, 0, 256)
-	buff := make([]byte, 4)
-
-	for i := 0; i < cap(colors); i++ {
+	buff := make([]byte, buffSize)
+	for i := range model {
 		if _, err := io.ReadFull(r, buff); err != nil {
 			return nil, err
 		}
-		colors = append(colors, util.ColorFromBytes(buff))
+		model[i] = util.ColorFromBytes(buff)
 	}
-
-	return colors, nil
+	return model, nil
 }
 
 // CheckHeader confirms the reader is an imretro image by checking the "magic bytes",

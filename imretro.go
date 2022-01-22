@@ -26,6 +26,14 @@ const PaletteIndex byte = 2
 // header.
 const WithPalette byte = 1 << (7 - PaletteIndex)
 
+// ColorAccuracyIndex is the "index" (from the left) of the bit in the mode
+// byte that signifies if the color accuracy that should be used.
+const ColorAccuracyIndex byte = 7
+
+// EightBitColors sets the mode byte to signify that each color channel should
+// use a byte, instead of 2 bits for each color channel.
+const EightBitColors byte = 1 << (7 - ColorAccuracyIndex)
+
 // MaximumDimension is the maximum size of an image's boundary in the imretro
 // format.
 const MaximumDimension int = 0xFFF
