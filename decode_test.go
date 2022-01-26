@@ -416,6 +416,11 @@ func TestDecodeReaderError(t *testing.T) {
 		t.Errorf(`err = nil`)
 	}
 
+	r = io.LimitReader(bytes.NewBuffer([]byte{0xFF, 0xAA, 0x55}), 1)
+	if _, _, err = decodeDimensions(r); err != io.EOF {
+		t.Errorf(`err = %v, want nil`, err)
+	}
+
 	r = errorReader{}
 	if _, err = decodeModel(r, 2, true); err == nil {
 		t.Errorf(`err = nil`)
