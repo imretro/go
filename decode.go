@@ -110,16 +110,24 @@ func decodeDimensions(r io.Reader) (width, height int, err error) {
 // the length of the ColorModel.
 func decodeModel(r io.Reader, size int, accurateColors bool) (color.Model, error) {
 	model := make(ColorModel, size)
-	buffSize := 1
+	chunkSize := 1
+	bitsPerChannel := 2
 	if accurateColors {
-		buffSize = 4
+		chunkSize = 4
+		bitsPerChannel = 8
 	}
-	buff := make([]byte, buffSize)
+	reader := bitio.NewReader(r, chunkSize)
 	for i := range model {
-		if _, err := io.ReadFull(r, buff); err != nil {
-			return nil, err
+		channels := make([]byte, 4)
+		for i := range channels {
+			bits, _, err := reader.ReadBits(bitsPerChannel)
+			if err != nil {
+				return nil, err
+			}
+			filledBits := util.FillByte(byte(bits), byte(bitsPerChannel))
+			channels[i] = filledBits
 		}
-		model[i] = util.ColorFromBytes(buff)
+		model[i] = util.ColorFromBytes(channels)
 	}
 	return model, nil
 }
