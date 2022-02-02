@@ -6,7 +6,6 @@ import (
 	"io"
 
 	"github.com/spenserblack/go-bitio"
-	"github.com/spenserblack/go-byteutils"
 
 	"github.com/imretro/go/internal/util"
 )
@@ -60,28 +59,19 @@ type encoderHelper = func(io.Writer, image.Image) error
 func encodeOneBit(w io.Writer, m image.Image) error {
 	// NOTE Write the pixels
 	bounds := m.Bounds()
-	buffcap := (bounds.Dx() * bounds.Dy()) / 8
-	if buffcap == 0 {
-		buffcap = 1
-	}
-	buffer := make([]byte, 1, buffcap)
-	var bitIndex byte = 0
+	pixels := bitio.NewWriter(w, 1)
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			if bitIndex >= 8 {
-				bitIndex = 0
-				// NOTE Next byte is being written
-				buffer = append(buffer, 0)
-			}
 			c := m.At(x, y)
 			// NOTE If at least 1 color is bright and not transparent, it is bright
-			bit := byte(Default1BitColorModel.Index(c))
-			byteutils.ChangeL(&buffer[len(buffer)-1], bitIndex, bit)
-			bitIndex++
+			bit := bitio.Bit(Default1BitColorModel.Index(c))
+			if _, err := pixels.WriteBit(bit); err != nil {
+				return err
+			}
 		}
 	}
-	w.Write(buffer)
-	return nil
+	_, err := pixels.CommitPending()
+	return err
 }
 
 func encodeTwoBit(w io.Writer, m image.Image) error {

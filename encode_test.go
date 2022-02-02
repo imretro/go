@@ -133,6 +133,17 @@ func TestEncode1BitPixels(t *testing.T) {
 	}
 }
 
+// TestEncode1BitPixelsErr checks that an error is returned if not all bits can
+// be written.
+func TestEncode1BitPixelsErr(t *testing.T) {
+	w := &cappedWriter{cap: 1}
+	// NOTE A 16-pixel "image"
+	m := image.Rect(0, 0, 16, 1)
+	if err := encodeOneBit(w, m); err == nil {
+		t.Fatalf(`err = nil`)
+	}
+}
+
 // TestEncode2BitPixels checks that the pixels have been given the proper indices
 // to the palette.
 func TestEncode2BitPixels(t *testing.T) {
