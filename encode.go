@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"io"
 
-	"github.com/spenserblack/go-byteutils"
+	"github.com/spenserblack/go-bitio"
 
 	"github.com/imretro/go/internal/util"
 )
@@ -38,10 +38,12 @@ func Encode(w io.Writer, m image.Image, pixelMode PixelMode) error {
 			return DimensionsTooLargeError(d)
 		}
 	}
-	dimensions := util.DimensionsAs3Bytes(uint16(width), uint16(height))
-
-	if _, err := w.Write(dimensions[:]); err != nil {
-		return err
+	dimensions := uint(width<<12 | height)
+	{
+		writer := bitio.NewWriter(w, 3)
+		if _, err := writer.WriteBits(dimensions, 24); err != nil {
+			return err
+		}
 	}
 
 	if err := writePalette(w, DefaultModelMap[pixelMode].(ColorModel)); err != nil {
@@ -57,55 +59,36 @@ type encoderHelper = func(io.Writer, image.Image) error
 func encodeOneBit(w io.Writer, m image.Image) error {
 	// NOTE Write the pixels
 	bounds := m.Bounds()
-	buffcap := (bounds.Dx() * bounds.Dy()) / 8
-	if buffcap == 0 {
-		buffcap = 1
-	}
-	buffer := make([]byte, 1, buffcap)
-	var bitIndex byte = 0
+	pixels := bitio.NewWriter(w, 1)
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			if bitIndex >= 8 {
-				bitIndex = 0
-				// NOTE Next byte is being written
-				buffer = append(buffer, 0)
-			}
 			c := m.At(x, y)
 			// NOTE If at least 1 color is bright and not transparent, it is bright
-			bit := byte(Default1BitColorModel.Index(c))
-			byteutils.ChangeL(&buffer[len(buffer)-1], bitIndex, bit)
-			bitIndex++
+			bit := bitio.Bit(Default1BitColorModel.Index(c))
+			if _, err := pixels.WriteBit(bit); err != nil {
+				return err
+			}
 		}
 	}
-	w.Write(buffer)
-	return nil
+	_, err := pixels.CommitPending()
+	return err
 }
 
 func encodeTwoBit(w io.Writer, m image.Image) error {
 	// NOTE Write the pixels
 	bounds := m.Bounds()
-	buffcap := (bounds.Dx() * bounds.Dy()) / 4
-	if buffcap == 0 {
-		buffcap = 1
-	}
-	buffer := make([]byte, 1, buffcap)
-	var bitIndex byte = 0
-
+	pixels := bitio.NewWriter(w, 1)
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			if bitIndex >= 8 {
-				bitIndex = 0
-				buffer = append(buffer, 0)
-			}
 			c := m.At(x, y)
-			bits := byte(Default2BitColorModel.Index(c))
-			buffer[len(buffer)-1] |= bits << (6 - bitIndex)
-			// NOTE Each index is 2 bits
-			bitIndex += 2
+			bits := bitio.Bits(Default2BitColorModel.Index(c))
+			if _, err := pixels.WriteBits(bits, 2); err != nil {
+				return err
+			}
 		}
 	}
-	w.Write(buffer)
-	return nil
+	_, err := pixels.CommitPending()
+	return err
 }
 
 func encodeEightBit(w io.Writer, m image.Image) error {

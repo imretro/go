@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"io"
 
+	"github.com/spenserblack/go-bitio"
 	"github.com/spenserblack/go-byteutils"
 
 	"github.com/imretro/go/internal/util"
@@ -61,13 +62,10 @@ func DecodeConfig(r io.Reader, customModels ModelMap) (image.Config, error) {
 	bitsPerPixel := mode & (0b11 << bitsPerPixelIndex)
 	hasPalette := byteutils.BitAsBool(byteutils.GetL(mode, PaletteIndex))
 
-	buff = make([]byte, 3)
-	_, err = io.ReadFull(r, buff)
+	width, height, err := decodeDimensions(r)
 	if err != nil {
 		return image.Config{}, err
 	}
-
-	width, height := util.DimensionsFrom3Bytes(buff[0], buff[1], buff[2])
 
 	var model color.Model
 	if !hasPalette {
@@ -94,20 +92,42 @@ func DecodeConfig(r io.Reader, customModels ModelMap) (image.Config, error) {
 	return image.Config{model, width, height}, err
 }
 
+// DecodeDimensions gets the dimensions from a reader.
+func decodeDimensions(r io.Reader) (width, height int, err error) {
+	var w, h uint
+	reader := bitio.NewReader(r, 3)
+	w, _, err = reader.ReadBits(12)
+	if err != nil {
+		return
+	}
+	h, _, err = reader.ReadBits(12)
+	width = int(w)
+	height = int(h)
+	return
+}
+
 // DecodeModel will decode bytes into a ColorModel. The bytes decoded depend on
 // the length of the ColorModel.
 func decodeModel(r io.Reader, size int, accurateColors bool) (color.Model, error) {
 	model := make(ColorModel, size)
-	buffSize := 1
+	chunkSize := 1
+	bitsPerChannel := 2
 	if accurateColors {
-		buffSize = 4
+		chunkSize = 4
+		bitsPerChannel = 8
 	}
-	buff := make([]byte, buffSize)
+	reader := bitio.NewReader(r, chunkSize)
 	for i := range model {
-		if _, err := io.ReadFull(r, buff); err != nil {
-			return nil, err
+		channels := make([]byte, 4)
+		for i := range channels {
+			bits, _, err := reader.ReadBits(bitsPerChannel)
+			if err != nil {
+				return nil, err
+			}
+			filledBits := util.FillByte(byte(bits), byte(bitsPerChannel))
+			channels[i] = filledBits
 		}
-		model[i] = util.ColorFromBytes(buff)
+		model[i] = util.ColorFromBytes(channels)
 	}
 	return model, nil
 }
