@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/imretro/go/internal/util"
+	"github.com/spenserblack/go-bitio"
 )
 
 // TestPassCheckHeader tests that a reader starting with "IMRETRO" bytes will
@@ -445,14 +446,17 @@ func TestDecodeError(t *testing.T) {
 
 // MakeImretroReader makes a 1-bit imretro reader.
 func MakeImretroReader(mode byte, palette [][]byte, width, height uint16, pixels []byte) *bytes.Buffer {
-	dimensions := util.DimensionsAs3Bytes(width, height)
+	dimensions := (uint(width) << 12) | uint(height)
 	b := bytes.NewBuffer([]byte{
 		// signature/magic bytes
 		'I', 'M', 'R', 'E', 'T', 'R', 'O',
 		// Mode byte (8-bit, in-file palette)
 		mode,
-		dimensions[0], dimensions[1], dimensions[2],
 	})
+	{
+		w := bitio.NewWriter(b, 3)
+		w.WriteBits(dimensions, 24)
+	}
 	for _, color := range palette {
 		b.Write(color)
 	}
