@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"io"
 
+	"github.com/spenserblack/go-bitio"
 	"github.com/spenserblack/go-byteutils"
 
 	"github.com/imretro/go/internal/util"
@@ -38,10 +39,12 @@ func Encode(w io.Writer, m image.Image, pixelMode PixelMode) error {
 			return DimensionsTooLargeError(d)
 		}
 	}
-	dimensions := util.DimensionsAs3Bytes(uint16(width), uint16(height))
-
-	if _, err := w.Write(dimensions[:]); err != nil {
-		return err
+	dimensions := uint(width<<12 | height)
+	{
+		writer := bitio.NewWriter(w, 3)
+		if _, err := writer.WriteBits(dimensions, 24); err != nil {
+			return err
+		}
 	}
 
 	if err := writePalette(w, DefaultModelMap[pixelMode].(ColorModel)); err != nil {
