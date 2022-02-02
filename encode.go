@@ -77,28 +77,18 @@ func encodeOneBit(w io.Writer, m image.Image) error {
 func encodeTwoBit(w io.Writer, m image.Image) error {
 	// NOTE Write the pixels
 	bounds := m.Bounds()
-	buffcap := (bounds.Dx() * bounds.Dy()) / 4
-	if buffcap == 0 {
-		buffcap = 1
-	}
-	buffer := make([]byte, 1, buffcap)
-	var bitIndex byte = 0
-
+	pixels := bitio.NewWriter(w, 1)
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			if bitIndex >= 8 {
-				bitIndex = 0
-				buffer = append(buffer, 0)
-			}
 			c := m.At(x, y)
-			bits := byte(Default2BitColorModel.Index(c))
-			buffer[len(buffer)-1] |= bits << (6 - bitIndex)
-			// NOTE Each index is 2 bits
-			bitIndex += 2
+			bits := bitio.Bits(Default2BitColorModel.Index(c))
+			if _, err := pixels.WriteBits(bits, 2); err != nil {
+				return err
+			}
 		}
 	}
-	w.Write(buffer)
-	return nil
+	_, err := pixels.CommitPending()
+	return err
 }
 
 func encodeEightBit(w io.Writer, m image.Image) error {

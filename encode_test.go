@@ -178,6 +178,18 @@ func TestEncode2BitPixels(t *testing.T) {
 	}
 }
 
+// TestEncode2BitPixelsErr checks that an error is returned if not all bits can
+// be written.
+func TestEncode2BitPixelsErr(t *testing.T) {
+	w := &cappedWriter{cap: 2}
+	// NOTE A 32-pixel "image"
+	m := image.Rect(0, 0, 16, 2)
+	if err := encodeTwoBit(w, m); err == nil {
+		t.Fatalf(`err = nil`)
+	}
+
+}
+
 // TestEncode8BitPixels checks that the pixels have been given the proper indices
 // to the palette.
 func TestEncode8BitPixels(t *testing.T) {
