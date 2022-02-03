@@ -89,7 +89,7 @@ func DecodeConfig(r io.Reader, customModels ModelMap) (image.Config, error) {
 		model, err = decodeModel(r, modelSize, mode&EightBitColors != 0)
 	}
 
-	return image.Config{model, width, height}, err
+	return image.Config{ColorModel: model, Width: width, Height: height}, err
 }
 
 // DecodeDimensions gets the dimensions from a reader.

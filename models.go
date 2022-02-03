@@ -25,6 +25,8 @@ func (mode MissingModelError) Error() string {
 	return fmt.Sprintf("No model for pixel mode %02b", mode)
 }
 
+// Default color models/palettes adhering to the defaults defined in the format
+// documentation.
 var (
 	Default1BitColorModel = NewOneBitColorModel(Black, White)
 	Default2BitColorModel = NewTwoBitColorModel(Black, DarkGray, LightGray, White)
@@ -89,6 +91,11 @@ func (model ColorModel) Index(c color.Color) uint8 {
 	return uint8(r | g | b | a)
 }
 
+// Convert maps a color to the best color defined in the model. This is not
+// necessarily the closest color. For example, RGBA 255, 255, 255, 0 would
+// always map to the "off" color of a 1-bit model, even if the "on" color is
+// RGBA 255, 255, 255, 0. This is because a transparent color is considered
+// to be off.
 func (model ColorModel) Convert(c color.Color) color.Color {
 	index := model.Index(c)
 	if int(index) >= len(model) {

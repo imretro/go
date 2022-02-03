@@ -1,4 +1,5 @@
-// Encode and decode retro-style images in the imretro format.
+// Package imretro supports encoding and decode retro-style images in the
+// imretro format.
 package imretro
 
 import (

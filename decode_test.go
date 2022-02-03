@@ -428,7 +428,10 @@ func TestDecodeReaderError(t *testing.T) {
 	}
 
 	r = &errorLimitReader{
-		&io.LimitedReader{MakeImretroReader(EightBit, nil, 10, 10, make([]byte, 100)), 50},
+		&io.LimitedReader{
+			R: MakeImretroReader(EightBit, nil, 10, 10, make([]byte, 100)),
+			N: 50,
+		},
 	}
 	if _, err = Decode(r, nil); err == nil {
 		t.Errorf(`err = nil`)
