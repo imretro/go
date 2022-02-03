@@ -28,7 +28,7 @@ type DecodeError string
 // documentation for the model types for more details. If the decoded image
 // contains an in-image palette, the model will be generated from that instead
 // of the custom value passed or the default models.
-func Decode(r io.Reader, customModels ModelMap) (ImretroImage, error) {
+func Decode(r io.Reader, customModels ModelMap) (Image, error) {
 	config, err := DecodeConfig(r, customModels)
 	if err != nil {
 		return nil, err

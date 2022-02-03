@@ -68,8 +68,8 @@ func (e DimensionsTooLargeError) Error() string {
 	return fmt.Sprintf("Dimensions too large for 16-bit number: %d", int(e))
 }
 
-// ImretroImage is an image decoded from the imretro format.
-type ImretroImage interface {
+// Image is an image decoded from the imretro format.
+type Image interface {
 	image.PalettedImage
 	// Palette gets the palette of the image.
 	Palette() color.Palette
