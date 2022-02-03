@@ -128,7 +128,7 @@ func (i imretroImage) ColorIndexAt(x, y int) uint8 {
 // At returns the color at the given pixel.
 func (i imretroImage) At(x, y int) color.Color {
 	if !image.Pt(x, y).In(i.Bounds()) {
-		return NoColor
+		return noColor
 	}
 	model := i.ColorModel().(ColorModel)
 	return model[i.ColorIndexAt(x, y)]

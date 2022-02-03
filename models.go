@@ -28,8 +28,8 @@ func (mode MissingModelError) Error() string {
 // Default color models/palettes adhering to the defaults defined in the format
 // documentation.
 var (
-	Default1BitColorModel = NewOneBitColorModel(Black, White)
-	Default2BitColorModel = NewTwoBitColorModel(Black, DarkGray, LightGray, White)
+	Default1BitColorModel = NewOneBitColorModel(black, white)
+	Default2BitColorModel = NewTwoBitColorModel(black, darkGray, lightGray, white)
 	Default8BitColorModel = make(ColorModel, 256)
 )
 
@@ -99,7 +99,7 @@ func (model ColorModel) Index(c color.Color) uint8 {
 func (model ColorModel) Convert(c color.Color) color.Color {
 	index := model.Index(c)
 	if int(index) >= len(model) {
-		return NoColor
+		return noColor
 	}
 	return model[index]
 }

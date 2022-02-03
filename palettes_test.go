@@ -45,10 +45,10 @@ func Test2BitModelIndex(t *testing.T) {
 		t.Errorf(`bits = %02b, want 0`, bits)
 	}
 
-	if bits := model.Index(DarkerGray); bits != 1 {
+	if bits := model.Index(darkerGray); bits != 1 {
 		t.Errorf(`bits = %02b, want 1`, bits)
 	}
-	if bits := model.Index(MediumGray); bits != 2 {
+	if bits := model.Index(mediumGray); bits != 2 {
 		t.Errorf(`bits = %02b, want 2`, bits)
 	}
 

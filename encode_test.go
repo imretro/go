@@ -256,7 +256,7 @@ func TestEncodeWriteFailures(t *testing.T) {
 // than a byte for all pixels, won't break.
 func TestEncodeTinyImages(t *testing.T) {
 	m := image.NewRGBA(image.Rect(0, 0, 1, 1))
-	m.Set(0, 0, White)
+	m.Set(0, 0, white)
 	tests := []*struct {
 		mode PixelMode
 		want byte
@@ -322,21 +322,21 @@ func Encode1Bit(t *testing.T, b *bytes.Buffer, width, height int) {
 
 	m := image.NewRGBA(image.Rect(0, 0, width, height))
 	for i := 0; i < 8; i++ {
-		var c color.Color = Black
+		var c color.Color = black
 		if i >= 4 {
-			c = White
+			c = white
 		}
 		m.Set(i, i/width, c)
 	}
 	for i := 8; i < 16; i++ {
-		var c color.Color = Black
+		var c color.Color = black
 		if i%2 == 0 && i < 12 {
-			c = White
+			c = white
 		}
 		m.Set(i%width, i/width, c)
 	}
-	m.Set(width-2, height-1, DarkerGray)
-	m.Set(width-1, height-1, LighterGray)
+	m.Set(width-2, height-1, darkerGray)
+	m.Set(width-1, height-1, lighterGray)
 
 	Encode(b, m, OneBit)
 }
@@ -344,15 +344,15 @@ func Encode1Bit(t *testing.T, b *bytes.Buffer, width, height int) {
 // Encode2Bit creates a 2-bit image and encodes it to a buffer.
 func Encode2Bit(t *testing.T, b *bytes.Buffer, width, height int) {
 	t.Helper()
-	colors := []color.Color{Black, DarkGray, LightGray, White}
+	colors := []color.Color{black, darkGray, lightGray, white}
 
 	m := image.NewRGBA(image.Rect(0, 0, width, height))
 	for i := 0; i < 16; i++ {
 		c := colors[i%len(colors)]
 		m.Set(i%width, i/width, c)
 	}
-	m.Set(width-2, height-1, DarkerGray)
-	m.Set(width-1, height-1, LighterGray)
+	m.Set(width-2, height-1, darkerGray)
+	m.Set(width-1, height-1, lighterGray)
 
 	Encode(b, m, TwoBit)
 }
@@ -360,7 +360,7 @@ func Encode2Bit(t *testing.T, b *bytes.Buffer, width, height int) {
 // Encode8Bit creates a 8-bit image and encodes it to a buffer.
 func Encode8Bit(t *testing.T, b *bytes.Buffer, width, height int) {
 	t.Helper()
-	colors := []color.Color{Black, White, color.RGBA{0xFF, 0, 0, 0xFF}, color.RGBA{0, 0, 0, 0}}
+	colors := []color.Color{black, white, color.RGBA{0xFF, 0, 0, 0xFF}, color.RGBA{0, 0, 0, 0}}
 
 	m := image.NewRGBA(image.Rect(0, 0, width, height))
 	for i := 0; i < 16; i++ {

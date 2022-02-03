@@ -68,7 +68,7 @@ func TestDecode1BitNoPalette(t *testing.T) {
 		t.Errorf(`Height = %v, want %v`, config.Height, height)
 	}
 
-	inputAndWant := [][2]color.Color{{DarkGray, Black}, {LightGray, White}}
+	inputAndWant := [][2]color.Color{{darkGray, black}, {lightGray, white}}
 
 	for _, colors := range inputAndWant {
 		input := colors[0]
@@ -99,10 +99,10 @@ func TestDecode2BitNoPalette(t *testing.T) {
 	}
 
 	inputAndWant := [][2]color.Color{
-		{color.Gray{0x0F}, Black},
-		{DarkGray, DarkGray},
-		{LightGray, LightGray},
-		{color.Gray{0xF0}, White},
+		{color.Gray{0x0F}, black},
+		{darkGray, darkGray},
+		{lightGray, lightGray},
+		{color.Gray{0xF0}, white},
 	}
 
 	for _, colors := range inputAndWant {
@@ -134,7 +134,7 @@ func TestDecode8BitNoPalette(t *testing.T) {
 	}
 
 	inputAndWant := [][2]color.Color{
-		{color.Gray{0x0F}, Black},
+		{color.Gray{0x0F}, black},
 		{color.RGBA{0xFF, 0x01, 0xFF, 0xF0}, color.RGBA{0xFF, 0x00, 0xFF, 0xFF}},
 	}
 
@@ -163,8 +163,8 @@ func TestDecode1BitPalette(t *testing.T) {
 	}
 
 	inputAndWant := [][2]color.Color{
-		{Black, color.RGBA{0x00, 0xFF, 0x00, 0xFF}},
-		{White, color.RGBA{0xEF, 0xFF, 0x00, 0xFF}},
+		{black, color.RGBA{0x00, 0xFF, 0x00, 0xFF}},
+		{white, color.RGBA{0xEF, 0xFF, 0x00, 0xFF}},
 	}
 
 	for _, colors := range inputAndWant {
@@ -190,8 +190,8 @@ func TestDecode1BitMinPalette(t *testing.T) {
 	}
 
 	inputAndWant := [][2]color.Color{
-		{Black, color.RGBA{0x00, 0xFF, 0x00, 0xFF}},
-		{White, color.RGBA{0xAA, 0xFF, 0x00, 0xFF}},
+		{black, color.RGBA{0x00, 0xFF, 0x00, 0xFF}},
+		{white, color.RGBA{0xAA, 0xFF, 0x00, 0xFF}},
 	}
 
 	for _, colors := range inputAndWant {
@@ -221,10 +221,10 @@ func TestDecode2BitPalette(t *testing.T) {
 	}
 
 	inputAndWant := [][2]color.Color{
-		{Black, color.RGBA{0xFF, 0x00, 0x00, 0xFF}},
-		{White, color.RGBA{0x00, 0x00, 0x00, 0x00}},
-		{DarkGray, color.RGBA{0x00, 0xFF, 0x00, 0xFF}},
-		{LightGray, color.RGBA{0x00, 0x00, 0xFF, 0xFF}},
+		{black, color.RGBA{0xFF, 0x00, 0x00, 0xFF}},
+		{white, color.RGBA{0x00, 0x00, 0x00, 0x00}},
+		{darkGray, color.RGBA{0x00, 0xFF, 0x00, 0xFF}},
+		{lightGray, color.RGBA{0x00, 0x00, 0xFF, 0xFF}},
 	}
 
 	for _, colors := range inputAndWant {
@@ -257,8 +257,8 @@ func TestDecode8BitPalette(t *testing.T) {
 	}
 
 	inputAndWant := [][2]color.Color{
-		{color.Alpha{0}, White},
-		{White, color.Alpha{0}},
+		{color.Alpha{0}, white},
+		{white, color.Alpha{0}},
 	}
 
 	for _, colors := range inputAndWant {
@@ -289,16 +289,16 @@ func TestDecode1BitImage(t *testing.T) {
 	}
 	for _, p := range blackPoints {
 		t.Logf(`Testing point %v`, p)
-		CompareColors(t, i.At(p.X, p.Y), Black)
+		CompareColors(t, i.At(p.X, p.Y), black)
 	}
 	for _, p := range whitePoints {
 		t.Logf(`Testing point %v`, p)
-		CompareColors(t, i.At(p.X, p.Y), White)
+		CompareColors(t, i.At(p.X, p.Y), white)
 	}
-	CompareColors(t, i.At(-1, -1), NoColor)
-	CompareColors(t, i.At(5, 1), NoColor)
-	CompareColors(t, i.At(5, 2), NoColor)
-	CompareColors(t, i.At(10, 10), NoColor)
+	CompareColors(t, i.At(-1, -1), noColor)
+	CompareColors(t, i.At(5, 1), noColor)
+	CompareColors(t, i.At(5, 2), noColor)
+	CompareColors(t, i.At(10, 10), noColor)
 }
 
 // TestDecode2BitImage tests that a 2-bit image would be properly decoded.
@@ -316,24 +316,24 @@ func TestDecode2BitImage(t *testing.T) {
 	fullPoints := []image.Point{{3, 0}, {4, 0}, {3, 1}}
 	for _, p := range offPoints {
 		t.Logf(`Testing point %v`, p)
-		CompareColors(t, i.At(p.X, p.Y), Black)
+		CompareColors(t, i.At(p.X, p.Y), black)
 	}
 	for _, p := range lightPoints {
 		t.Logf(`Testing point %v`, p)
-		CompareColors(t, i.At(p.X, p.Y), DarkGray)
+		CompareColors(t, i.At(p.X, p.Y), darkGray)
 	}
 	for _, p := range strongPoints {
 		t.Logf(`Testing point %v`, p)
-		CompareColors(t, i.At(p.X, p.Y), LightGray)
+		CompareColors(t, i.At(p.X, p.Y), lightGray)
 	}
 	for _, p := range fullPoints {
 		t.Logf(`Testing point %v`, p)
-		CompareColors(t, i.At(p.X, p.Y), White)
+		CompareColors(t, i.At(p.X, p.Y), white)
 	}
-	CompareColors(t, i.At(-1, -1), NoColor)
-	CompareColors(t, i.At(5, 1), NoColor)
-	CompareColors(t, i.At(5, 2), NoColor)
-	CompareColors(t, i.At(10, 10), NoColor)
+	CompareColors(t, i.At(-1, -1), noColor)
+	CompareColors(t, i.At(5, 1), noColor)
+	CompareColors(t, i.At(5, 2), noColor)
+	CompareColors(t, i.At(10, 10), noColor)
 }
 
 // TestDecode8BitImage tests that an 8-bit image would be properly decoded.
@@ -349,7 +349,7 @@ func TestDecode8BitImage(t *testing.T) {
 	}
 
 	wantColors := []color.Color{
-		color.Alpha{0}, White, Black, color.RGBA{0xFF, 0, 0, 0xFF}, color.RGBA{0, 0xFF, 0, 0xFF},
+		color.Alpha{0}, white, black, color.RGBA{0xFF, 0, 0, 0xFF}, color.RGBA{0, 0xFF, 0, 0xFF},
 		color.RGBA{0, 0, 0xFF, 0xFF}, color.RGBA{0xFF, 0xFF, 0, 0xFF}, color.RGBA{0xFF, 0, 0xFF, 0xFF}, color.RGBA{0, 0xFF, 0xFF, 0xFF}, color.RGBA{0xAA, 0xAA, 0xAA, 0xAA},
 	}
 
@@ -359,10 +359,10 @@ func TestDecode8BitImage(t *testing.T) {
 		t.Logf(`Testing point (%d, %d)`, x, y)
 		CompareColors(t, i.At(x, y), want)
 	}
-	CompareColors(t, i.At(-1, -1), NoColor)
-	CompareColors(t, i.At(5, 1), NoColor)
-	CompareColors(t, i.At(5, 2), NoColor)
-	CompareColors(t, i.At(10, 10), NoColor)
+	CompareColors(t, i.At(-1, -1), noColor)
+	CompareColors(t, i.At(5, 1), noColor)
+	CompareColors(t, i.At(5, 2), noColor)
+	CompareColors(t, i.At(10, 10), noColor)
 }
 
 // TestDecodeWithCustomModel tests that an image can be decoded and the custom
