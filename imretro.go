@@ -12,6 +12,7 @@ import (
 // PixelMode is the type for managing the number of bits per pixel.
 type PixelMode = byte
 
+// Mode flags for picking the number of bits each pixel will have.
 const (
 	OneBit PixelMode = iota << 6
 	TwoBit
