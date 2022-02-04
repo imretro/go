@@ -15,7 +15,7 @@ import (
 // pass.
 func TestPassCheckHeader(t *testing.T) {
 	buff := make([]byte, 8)
-	r := MakeImretroReader(EightBit|WithPalette|EightBitColors, nil, 0, 0, nil)
+	r := MakeImretroReader(EightBit|WithPalette|RGBA|EightBitColors, nil, 0, 0, nil)
 	mode, err := checkHeader(r, buff)
 	if err != nil {
 		t.Fatalf(`err = %v, want nil`, err)
@@ -154,7 +154,7 @@ func TestDecode1BitPalette(t *testing.T) {
 		{0x00, 0xFF, 0x00, 0xFF},
 		{0xEF, 0xFF, 0x00, 0xFF},
 	}
-	r := MakeImretroReader(OneBit|WithPalette|EightBitColors, palette, 2, 2, make([]byte, 1))
+	r := MakeImretroReader(OneBit|WithPalette|RGBA|EightBitColors, palette, 2, 2, make([]byte, 1))
 
 	config, err := DecodeConfig(r, nil)
 
@@ -181,7 +181,7 @@ func TestDecode1BitPalette(t *testing.T) {
 // channels would be properly decoded.
 func TestDecode1BitMinPalette(t *testing.T) {
 	palette := [][]byte{{0x33}, {0xB3}}
-	r := MakeImretroReader(OneBit|WithPalette, palette, 2, 2, make([]byte, 1))
+	r := MakeImretroReader(OneBit|WithPalette|RGBA, palette, 2, 2, make([]byte, 1))
 
 	config, err := DecodeConfig(r, nil)
 
@@ -212,7 +212,7 @@ func TestDecode2BitPalette(t *testing.T) {
 		{0x00, 0x00, 0xFF, 0xFF},
 		{0x00, 0x00, 0x00, 0x00},
 	}
-	r := MakeImretroReader(TwoBit|WithPalette|EightBitColors, palette, 2, 2, make([]byte, 4))
+	r := MakeImretroReader(TwoBit|WithPalette|RGBA|EightBitColors, palette, 2, 2, make([]byte, 4))
 
 	config, err := DecodeConfig(r, nil)
 
@@ -248,7 +248,7 @@ func TestDecode8BitPalette(t *testing.T) {
 		reversedPalette = append(reversedPalette, []byte{r, g, b, a})
 	}
 
-	r := MakeImretroReader(EightBit|WithPalette|EightBitColors, reversedPalette, 2, 2, make([]byte, 4))
+	r := MakeImretroReader(EightBit|WithPalette|RGBA|EightBitColors, reversedPalette, 2, 2, make([]byte, 4))
 
 	config, err := DecodeConfig(r, nil)
 
