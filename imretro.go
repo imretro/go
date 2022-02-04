@@ -10,8 +10,12 @@ import (
 	"github.com/spenserblack/go-byteutils"
 )
 
+// ModeFlag is the type for enabling a feature by setting a flag in the mode
+// byte.
+type ModeFlag = byte
+
 // PixelMode is the type for managing the number of bits per pixel.
-type PixelMode = byte
+type PixelMode = ModeFlag
 
 // Mode flags for picking the number of bits each pixel will have.
 const (
