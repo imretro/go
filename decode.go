@@ -60,7 +60,7 @@ func DecodeConfig(r io.Reader, customModels ModelMap) (image.Config, error) {
 	}
 
 	bitsPerPixel := mode & (0b11 << bitsPerPixelIndex)
-	hasPalette := byteutils.BitAsBool(byteutils.GetL(mode, PaletteIndex))
+	hasPalette := byteutils.BitAsBool(byteutils.GetL(mode, paletteIndex))
 
 	width, height, err := decodeDimensions(r)
 	if err != nil {
