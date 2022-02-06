@@ -14,12 +14,17 @@ import (
 // byte.
 type ModeFlag = byte
 
+// PixelBitsIndex is the "index" (from the left) of the bits in the mode byte
+// that signify the number of bits each pixel needs, and also the number of
+// available colors.
+const pixelBitsIndex byte = 1
+
 // PixelMode is the type for managing the number of bits per pixel.
 type PixelMode = ModeFlag
 
 // Mode flags for picking the number of bits each pixel will have.
 const (
-	OneBit PixelMode = iota << 6
+	OneBit PixelMode = iota << (7 - pixelBitsIndex)
 	TwoBit
 	EightBit
 )
