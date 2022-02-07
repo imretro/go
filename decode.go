@@ -14,10 +14,6 @@ import (
 // ImretroSignature is the "magic string" used for identifying an imretro file.
 const ImretroSignature = "IMRETRO"
 
-// BitsPerPixelIndex is the position of the two bits for the bits-per-pixel
-// mode (7 is left-most).
-const bitsPerPixelIndex byte = 6
-
 // DecodeError is an error signifying that something unexpected happened when
 // decoding the imretro reader.
 type DecodeError string
@@ -59,7 +55,7 @@ func DecodeConfig(r io.Reader, customModels ModelMap) (image.Config, error) {
 		return image.Config{}, err
 	}
 
-	bitsPerPixel := mode & (0b11 << bitsPerPixelIndex)
+	bitsPerPixel := mode & (0b11 << pixelBitsIndex)
 	hasPalette := byteutils.BitAsBool(byteutils.GetR(mode, paletteIndex))
 
 	width, height, err := decodeDimensions(r)
