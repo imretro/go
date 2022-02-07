@@ -14,36 +14,36 @@ import (
 // byte.
 type ModeFlag = byte
 
-// PixelBitsIndex is the "index" (from the left) of the bits in the mode byte
+// PixelBitsIndex is the "index" (from the right) of the bits in the mode byte
 // that signify the number of bits each pixel needs, and also the number of
 // available colors.
-const pixelBitsIndex byte = 1
+const pixelBitsIndex byte = 6
 
 // PixelMode is the type for managing the number of bits per pixel.
 type PixelMode = ModeFlag
 
 // Mode flags for picking the number of bits each pixel will have.
 const (
-	OneBit PixelMode = iota << (7 - pixelBitsIndex)
+	OneBit PixelMode = iota << pixelBitsIndex
 	TwoBit
 	EightBit
 )
 
-// PaletteIndex is the "index" (from the left) of the bit in the mode byte that
+// PaletteIndex is the "index" (from the right) of the bit in the mode byte that
 // signifies if there is an in-file palette.
-const paletteIndex byte = 2
+const paletteIndex byte = 5
 
 // WithPalette can be used with a union with the bit count when setting the
 // header.
-const WithPalette byte = 1 << (7 - paletteIndex)
+const WithPalette byte = 1 << paletteIndex
 
-// ColorAccuracyIndex is the "index" (from the left) of the bit in the mode
+// ColorAccuracyIndex is the "index" (from the right) of the bit in the mode
 // byte that signifies if the color accuracy that should be used.
-const colorAccuracyIndex byte = 7
+const colorAccuracyIndex byte = 0
 
 // EightBitColors sets the mode byte to signify that each color channel should
 // use a byte, instead of 2 bits for each color channel.
-const EightBitColors byte = 1 << (7 - colorAccuracyIndex)
+const EightBitColors byte = 1 << colorAccuracyIndex
 
 // MaximumDimension is the maximum size of an image's boundary in the imretro
 // format.
