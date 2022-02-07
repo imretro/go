@@ -10,8 +10,22 @@ import (
 	"github.com/imretro/go/internal/util"
 )
 
+// CustomModel is a type that converts a pixel mode to a color.Model.  It should
+// be used to override default palettes/color models.
+type CustomModel interface {
+	// ColorModel gets a color.Model from a PixelMode. Ok should be true if the
+	// color.Model could be returned, and false if it couldn't.
+	ColorModel(PixelMode) (model color.Model, ok bool)
+}
+
 // ModelMap maps bit modes to color models.
-type ModelMap = map[PixelMode]color.Model
+type ModelMap map[PixelMode]color.Model
+
+// ColorModel gets the mapped color model.
+func (m ModelMap) ColorModel(mode PixelMode) (model color.Model, ok bool) {
+	model, ok = m[mode]
+	return
+}
 
 // ErrUnknownModel is raised when an unknown color model is interpreted.
 var ErrUnknownModel = errors.New("Color model not recognized")
@@ -102,6 +116,11 @@ func (model ColorModel) Convert(c color.Color) color.Color {
 		return noColor
 	}
 	return model[index]
+}
+
+// ColorModel will always return itself and ok.
+func (model ColorModel) ColorModel(PixelMode) (self color.Model, ok bool) {
+	return model, true
 }
 
 func init() {

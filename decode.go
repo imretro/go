@@ -24,11 +24,13 @@ type DecodeError string
 
 // Decode decodes an image in the imretro format.
 //
-// Custom color models can be used instead of the default color models. See the
-// documentation for the model types for more details. If the decoded image
-// contains an in-image palette, the model will be generated from that instead
-// of the custom value passed or the default models.
-func Decode(r io.Reader, customModels ModelMap) (Image, error) {
+// Custom color models can be used instead of the default color models. For
+// simplicity's sake, a single ColorModel can be passed as the CustomModel. If
+// multiple PixelMode values are expected, it is recommended to use a ModelMap
+// for the CustomModel. See the documentation for the model types for more
+// details. If the decoded image contains an in-image palette, the model will be
+// generated from that instead of the custom value passed or the default models.
+func Decode(r io.Reader, customModels CustomModel) (Image, error) {
 	config, err := DecodeConfig(r, customModels)
 	if err != nil {
 		return nil, err
@@ -45,7 +47,7 @@ func Decode(r io.Reader, customModels ModelMap) (Image, error) {
 // without decoding the entire image.
 //
 // Custom color models can be used instead of the default model.
-func DecodeConfig(r io.Reader, customModels ModelMap) (image.Config, error) {
+func DecodeConfig(r io.Reader, customModels CustomModel) (image.Config, error) {
 	var buff []byte
 	var err error
 	modelMap := customModels
@@ -70,7 +72,7 @@ func DecodeConfig(r io.Reader, customModels ModelMap) (image.Config, error) {
 	var model color.Model
 	if !hasPalette {
 		var ok bool
-		model, ok = modelMap[bitsPerPixel]
+		model, ok = modelMap.ColorModel(bitsPerPixel)
 		if !ok {
 			err = MissingModelError(bitsPerPixel)
 		}
