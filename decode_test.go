@@ -423,7 +423,7 @@ func TestDecodeReaderError(t *testing.T) {
 	}
 
 	r = errorReader{}
-	if _, err = decodeModel(r, 2, true); err == nil {
+	if _, err = decodeModel(r, 2, true, RGBA); err == nil {
 		t.Errorf(`err = nil`)
 	}
 
