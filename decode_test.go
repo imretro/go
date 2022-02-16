@@ -283,6 +283,39 @@ func TestDecode2BitNoPalette(t *testing.T) {
 	}
 }
 
+// TestDecode2BitFullRGBAPalette tests that a 2-bit palette would be properly decoded.
+func TestDecode2BitFullRGBAPaletteBitPalette(t *testing.T) {
+	palette := [][]byte{
+		{0xFF, 0x00, 0x00, 0xFF},
+		{0x00, 0xFF, 0x00, 0xFF},
+		{0x00, 0x00, 0xFF, 0xFF},
+		{0x00, 0x00, 0x00, 0x00},
+	}
+	r := MakeImretroReader(TwoBit|WithPalette|RGBA|EightBitColors, palette, 2, 2, make([]byte, 4))
+
+	config, err := DecodeConfig(r, nil)
+
+	if err != nil {
+		t.Fatalf(`err = %v, want nil`, err)
+	}
+
+	inputAndWant := [][2]color.Color{
+		{black, color.RGBA{0xFF, 0x00, 0x00, 0xFF}},
+		{white, color.RGBA{0x00, 0x00, 0x00, 0x00}},
+		{darkGray, color.RGBA{0x00, 0xFF, 0x00, 0xFF}},
+		{lightGray, color.RGBA{0x00, 0x00, 0xFF, 0xFF}},
+	}
+
+	for _, colors := range inputAndWant {
+		input := colors[0]
+		want := colors[1]
+
+		t.Logf(`Comparing conversion of %v`, input)
+		actual := config.ColorModel.Convert(input)
+		CompareColors(t, actual, want)
+	}
+}
+
 // TestDecode8BitNoPalette tests that an 8-bit-mode image with no palette can be decoded.
 func TestDecode8BitNoPalette(t *testing.T) {
 	const width, height int = 320, 240
@@ -316,41 +349,8 @@ func TestDecode8BitNoPalette(t *testing.T) {
 	}
 }
 
-// TestDecode2BitPalette tests that a 2-bit palette would be properly decoded.
-func TestDecode2BitPalette(t *testing.T) {
-	palette := [][]byte{
-		{0xFF, 0x00, 0x00, 0xFF},
-		{0x00, 0xFF, 0x00, 0xFF},
-		{0x00, 0x00, 0xFF, 0xFF},
-		{0x00, 0x00, 0x00, 0x00},
-	}
-	r := MakeImretroReader(TwoBit|WithPalette|RGBA|EightBitColors, palette, 2, 2, make([]byte, 4))
-
-	config, err := DecodeConfig(r, nil)
-
-	if err != nil {
-		t.Fatalf(`err = %v, want nil`, err)
-	}
-
-	inputAndWant := [][2]color.Color{
-		{black, color.RGBA{0xFF, 0x00, 0x00, 0xFF}},
-		{white, color.RGBA{0x00, 0x00, 0x00, 0x00}},
-		{darkGray, color.RGBA{0x00, 0xFF, 0x00, 0xFF}},
-		{lightGray, color.RGBA{0x00, 0x00, 0xFF, 0xFF}},
-	}
-
-	for _, colors := range inputAndWant {
-		input := colors[0]
-		want := colors[1]
-
-		t.Logf(`Comparing conversion of %v`, input)
-		actual := config.ColorModel.Convert(input)
-		CompareColors(t, actual, want)
-	}
-}
-
-// TestDecode8BitPalette tests that a 2-bit palette would be properly decoded.
-func TestDecode8BitPalette(t *testing.T) {
+// TestDecode8BitFullRGBAPalette tests that a 2-bit palette would be properly decoded.
+func TestDecode8BitFullRGBAPalette(t *testing.T) {
 	reversedPalette := make([][]byte, 0, 256)
 
 	last := len(Default8BitColorModel) - 1
