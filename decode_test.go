@@ -161,6 +161,63 @@ func TestDecode1BitMinRGBAPalette(t *testing.T) {
 	}
 }
 
+// TestDecode1BitFullGrayscalePalette tests that a 1-bit Grayscale palette with
+// color accuracy would be properly decoded.
+func TestDecode1BitFullGrayscalePalette(t *testing.T) {
+	palette := [][]byte{{0x55}, {0xAA}}
+	r := MakeImretroReader(OneBit|WithPalette|Grayscale|EightBitColors, palette, 2, 2, make([]byte, 1))
+
+	config, err := DecodeConfig(r, nil)
+
+	if err != nil {
+		t.Fatalf(`err = %v, want nil`, err)
+	}
+
+	inputAndWant := [][2]color.Color{
+		{black, color.Gray{0x55}},
+		{white, color.Gray{0xAA}},
+	}
+
+	for _, colors := range inputAndWant {
+		input := colors[0]
+		want := colors[1]
+
+		t.Logf(`Comparing conversion of %v`, input)
+		actual := config.ColorModel.Convert(input)
+		CompareColors(t, actual, want)
+	}
+}
+
+// TestDecode1BitFullRGBPalette tests that a 1-bit RGB palette with color
+// accuracy would be properly decoded.
+func TestDecode1BitFullRGBPalette(t *testing.T) {
+	palette := [][]byte{
+		{0x00, 0xFF, 0x00},
+		{0xEF, 0xFF, 0xAA},
+	}
+	r := MakeImretroReader(OneBit|WithPalette|RGB|EightBitColors, palette, 2, 2, make([]byte, 1))
+
+	config, err := DecodeConfig(r, nil)
+
+	if err != nil {
+		t.Fatalf(`err = %v, want nil`, err)
+	}
+
+	inputAndWant := [][2]color.Color{
+		{black, color.RGBA{0x00, 0xFF, 0x00, 0xFF}},
+		{white, color.RGBA{0xEF, 0xFF, 0xAA, 0xFF}},
+	}
+
+	for _, colors := range inputAndWant {
+		input := colors[0]
+		want := colors[1]
+
+		t.Logf(`Comparing conversion of %v`, input)
+		actual := config.ColorModel.Convert(input)
+		CompareColors(t, actual, want)
+	}
+}
+
 // TestDecode1BitFullRGBAPalette tests that a 1-bit RGBA palette with color
 // accuracy would be properly decoded.
 func TestDecode1BitFullRGBAPalette(t *testing.T) {
