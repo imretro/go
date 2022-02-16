@@ -80,103 +80,6 @@ func TestDecode1BitNoPalette(t *testing.T) {
 	}
 }
 
-// TestDecode2BitNoPalette tests that a 2-bit-mode image with no palette can be decoded.
-func TestDecode2BitNoPalette(t *testing.T) {
-	const width, height int = 320, 240
-	var pixels = make([]byte, width*height)
-	r := MakeImretroReader(TwoBit|EightBitColors, [][]byte{}, uint16(320), uint16(240), pixels)
-
-	config, err := DecodeConfig(r, nil)
-
-	if err != nil {
-		t.Fatalf(`err = %v, want nil`, err)
-	}
-	if config.Width != width {
-		t.Errorf(`Width = %v, want %v`, config.Width, width)
-	}
-	if config.Height != height {
-		t.Errorf(`Height = %v, want %v`, config.Height, height)
-	}
-
-	inputAndWant := [][2]color.Color{
-		{color.Gray{0x0F}, black},
-		{darkGray, darkGray},
-		{lightGray, lightGray},
-		{color.Gray{0xF0}, white},
-	}
-
-	for _, colors := range inputAndWant {
-		input := colors[0]
-		want := colors[1]
-
-		t.Logf(`Comparing conversion of %v`, input)
-		actual := config.ColorModel.Convert(input)
-		CompareColors(t, actual, want)
-	}
-}
-
-// TestDecode8BitNoPalette tests that an 8-bit-mode image with no palette can be decoded.
-func TestDecode8BitNoPalette(t *testing.T) {
-	const width, height int = 320, 240
-	var pixels = make([]byte, width*height)
-	r := MakeImretroReader(EightBit|EightBitColors, [][]byte{}, uint16(320), uint16(240), pixels)
-
-	config, err := DecodeConfig(r, nil)
-
-	if err != nil {
-		t.Fatalf(`err = %v, want nil`, err)
-	}
-	if config.Width != width {
-		t.Errorf(`Width = %v, want %v`, config.Width, width)
-	}
-	if config.Height != height {
-		t.Errorf(`Height = %v, want %v`, config.Height, height)
-	}
-
-	inputAndWant := [][2]color.Color{
-		{color.Gray{0x0F}, black},
-		{color.RGBA{0xFF, 0x01, 0xFF, 0xF0}, color.RGBA{0xFF, 0x00, 0xFF, 0xFF}},
-	}
-
-	for _, colors := range inputAndWant {
-		input := colors[0]
-		want := colors[1]
-
-		t.Logf(`Comparing conversion of %v`, input)
-		actual := config.ColorModel.Convert(input)
-		CompareColors(t, actual, want)
-	}
-}
-
-// TestDecode1BitPalette tests that a 1-bit palette would be properly decoded.
-func TestDecode1BitPalette(t *testing.T) {
-	palette := [][]byte{
-		{0x00, 0xFF, 0x00, 0xFF},
-		{0xEF, 0xFF, 0x00, 0xFF},
-	}
-	r := MakeImretroReader(OneBit|WithPalette|RGBA|EightBitColors, palette, 2, 2, make([]byte, 1))
-
-	config, err := DecodeConfig(r, nil)
-
-	if err != nil {
-		t.Fatalf(`err = %v, want nil`, err)
-	}
-
-	inputAndWant := [][2]color.Color{
-		{black, color.RGBA{0x00, 0xFF, 0x00, 0xFF}},
-		{white, color.RGBA{0xEF, 0xFF, 0x00, 0xFF}},
-	}
-
-	for _, colors := range inputAndWant {
-		input := colors[0]
-		want := colors[1]
-
-		t.Logf(`Comparing conversion of %v`, input)
-		actual := config.ColorModel.Convert(input)
-		CompareColors(t, actual, want)
-	}
-}
-
 // TestDecode1BitMinGrayscalePalette tests that a 1-bit grayscale palette using
 // 2-bit color channels would be properly decoded.
 func TestDecode1BitMinGrayscalePalette(t *testing.T) {
@@ -255,6 +158,104 @@ func TestDecode1BitMinRGBAPalette(t *testing.T) {
 		t.Logf(`Converting %#v`, tt.input)
 		actual := config.ColorModel.Convert(tt.input)
 		CompareColors(t, actual, tt.want)
+	}
+}
+
+// TestDecode1BitFullRGBAPalette tests that a 1-bit RGBA palette with color
+// accuracy would be properly decoded.
+func TestDecode1BitFullRGBAPalette(t *testing.T) {
+	palette := [][]byte{
+		{0x00, 0xFF, 0x00, 0xFF},
+		{0xEF, 0xFF, 0x00, 0xFF},
+	}
+	r := MakeImretroReader(OneBit|WithPalette|RGBA|EightBitColors, palette, 2, 2, make([]byte, 1))
+
+	config, err := DecodeConfig(r, nil)
+
+	if err != nil {
+		t.Fatalf(`err = %v, want nil`, err)
+	}
+
+	inputAndWant := [][2]color.Color{
+		{black, color.RGBA{0x00, 0xFF, 0x00, 0xFF}},
+		{white, color.RGBA{0xEF, 0xFF, 0x00, 0xFF}},
+	}
+
+	for _, colors := range inputAndWant {
+		input := colors[0]
+		want := colors[1]
+
+		t.Logf(`Comparing conversion of %v`, input)
+		actual := config.ColorModel.Convert(input)
+		CompareColors(t, actual, want)
+	}
+}
+
+// TestDecode2BitNoPalette tests that a 2-bit-mode image with no palette can be decoded.
+func TestDecode2BitNoPalette(t *testing.T) {
+	const width, height int = 320, 240
+	var pixels = make([]byte, width*height)
+	r := MakeImretroReader(TwoBit|EightBitColors, [][]byte{}, uint16(320), uint16(240), pixels)
+
+	config, err := DecodeConfig(r, nil)
+
+	if err != nil {
+		t.Fatalf(`err = %v, want nil`, err)
+	}
+	if config.Width != width {
+		t.Errorf(`Width = %v, want %v`, config.Width, width)
+	}
+	if config.Height != height {
+		t.Errorf(`Height = %v, want %v`, config.Height, height)
+	}
+
+	inputAndWant := [][2]color.Color{
+		{color.Gray{0x0F}, black},
+		{darkGray, darkGray},
+		{lightGray, lightGray},
+		{color.Gray{0xF0}, white},
+	}
+
+	for _, colors := range inputAndWant {
+		input := colors[0]
+		want := colors[1]
+
+		t.Logf(`Comparing conversion of %v`, input)
+		actual := config.ColorModel.Convert(input)
+		CompareColors(t, actual, want)
+	}
+}
+
+// TestDecode8BitNoPalette tests that an 8-bit-mode image with no palette can be decoded.
+func TestDecode8BitNoPalette(t *testing.T) {
+	const width, height int = 320, 240
+	var pixels = make([]byte, width*height)
+	r := MakeImretroReader(EightBit|EightBitColors, [][]byte{}, uint16(320), uint16(240), pixels)
+
+	config, err := DecodeConfig(r, nil)
+
+	if err != nil {
+		t.Fatalf(`err = %v, want nil`, err)
+	}
+	if config.Width != width {
+		t.Errorf(`Width = %v, want %v`, config.Width, width)
+	}
+	if config.Height != height {
+		t.Errorf(`Height = %v, want %v`, config.Height, height)
+	}
+
+	inputAndWant := [][2]color.Color{
+		{color.Gray{0x0F}, black},
+		{color.RGBA{0xFF, 0x01, 0xFF, 0xF0}, color.RGBA{0xFF, 0x00, 0xFF, 0xFF}},
+	}
+
+	for _, colors := range inputAndWant {
+		input := colors[0]
+		want := colors[1]
+
+		t.Logf(`Comparing conversion of %v`, input)
+		actual := config.ColorModel.Convert(input)
+		CompareColors(t, actual, want)
 	}
 }
 
