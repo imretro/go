@@ -43,29 +43,28 @@ func TestDecodedImage(t *testing.T) {
 
 	colors := []color.Color{color.Gray{0xFF}, color.Gray{0}}
 
-	for i := 0; i < bounds.Dx()*bounds.Dy(); i++ {
-		x := i % 9
-		y := i / 9
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			want := colors[(x+y)%2]
 
-		want := colors[i%2]
+			wr, wg, wb, wa := want.RGBA()
+			ar, ag, ab, aa := m.At(x, y).RGBA()
 
-		wr, wg, wb, wa := want.RGBA()
-		ar, ag, ab, aa := m.At(x, y).RGBA()
+			tests := []struct {
+				want    uint32
+				actual  uint32
+				channel rune
+			}{
+				{wr, ar, 'r'}, {wg, ag, 'g'}, {wb, ab, 'b'}, {wa, aa, 'a'},
+			}
 
-		tests := []struct {
-			want    uint32
-			actual  uint32
-			channel rune
-		}{
-			{wr, ar, 'r'}, {wg, ag, 'g'}, {wb, ab, 'b'}, {wa, aa, 'a'},
-		}
-
-		for _, tt := range tests {
-			if tt.actual != tt.want {
-				t.Fatalf(
-					`%c color channel of pixel (%d, %d) = %v, want %v`,
-					tt.channel, x, y, tt.actual, tt.want,
-				)
+			for _, tt := range tests {
+				if tt.actual != tt.want {
+					t.Fatalf(
+						`%c color channel of pixel (%d, %d) = %v, want %v`,
+						tt.channel, x, y, tt.actual, tt.want,
+					)
+				}
 			}
 		}
 	}
