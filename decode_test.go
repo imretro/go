@@ -412,7 +412,7 @@ func TestDecode2BitFullMinRGBPalette(t *testing.T) {
 		{0, 0, 0xFF},
 		{0xFF, 0xFF, 0},
 	}
-	r := MakeImretroReader(TwoBit|WithPalette|RGB, palette, 2, 2, make([]byte, 1))
+	r := MakeImretroReader(TwoBit|WithPalette|RGB|EightBitColors, palette, 2, 2, make([]byte, 1))
 
 	config, err := DecodeConfig(r, nil)
 
