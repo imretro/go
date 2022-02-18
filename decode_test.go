@@ -374,6 +374,103 @@ func TestDecode2BitMinRGBAPalette(t *testing.T) {
 	}
 }
 
+// TestDecode2BitFullGrayscalePalette tests that a 2-bit grayscale palette using
+// 2-bit color channels would be properly decoded.
+func TestDecode2BitFullGrayscalePalette(t *testing.T) {
+	palette := [][]byte{{0xFF, 0xAA, 0x55, 0}}
+	r := MakeImretroReader(TwoBit|WithPalette|Grayscale|EightBitColors, palette, 2, 2, make([]byte, 1))
+
+	config, err := DecodeConfig(r, nil)
+
+	if err != nil {
+		t.Fatalf(`err = %v, want nil`, err)
+	}
+
+	tests := []struct {
+		input color.Color
+		want  color.Color
+	}{
+		{black, color.Gray{0xFF}},
+		{darkGray, color.Gray{0xAA}},
+		{lightGray, color.Gray{0x55}},
+		{white, color.Gray{0}},
+	}
+
+	for _, tt := range tests {
+		t.Logf(`Converting %#v`, tt.input)
+		actual := config.ColorModel.Convert(tt.input)
+		CompareColors(t, actual, tt.want)
+	}
+}
+
+// TestDecode2BitFullRGBPalette tests that a 2-bit RGB palette using
+// 2-bit color channels would be properly decoded.
+func TestDecode2BitFullMinRGBPalette(t *testing.T) {
+	palette := [][]byte{
+		{0xFF, 0, 0},
+		{0, 0xFF, 0},
+		{0, 0, 0xFF},
+		{0xFF, 0xFF, 0},
+	}
+	r := MakeImretroReader(TwoBit|WithPalette|RGB, palette, 2, 2, make([]byte, 1))
+
+	config, err := DecodeConfig(r, nil)
+
+	if err != nil {
+		t.Fatalf(`err = %v, want nil`, err)
+	}
+
+	tests := []struct {
+		input color.Color
+		want  color.Color
+	}{
+		{black, color.RGBA{0xFF, 0, 0, 0xFF}},
+		{darkGray, color.RGBA{0, 0xFF, 0, 0xFF}},
+		{lightGray, color.RGBA{0, 0, 0xFF, 0xFF}},
+		{white, color.RGBA{0xFF, 0xFF, 0, 0xFF}},
+	}
+
+	for _, tt := range tests {
+		t.Logf(`Converting %#v`, tt.input)
+		actual := config.ColorModel.Convert(tt.input)
+		CompareColors(t, actual, tt.want)
+	}
+}
+
+// TestDecode2BitFullRGBAPalette tests that a 2-bit RGBA palette using
+// 2-bit color channels would be properly decoded.
+func TestDecode2BitFullRGBAPalette(t *testing.T) {
+	palette := [][]byte{
+		{0, 0, 0, 0},
+		{0x55, 0x55, 0x55, 0x55},
+		{0xAA, 0xAA, 0xAA, 0xAA},
+		{0xFF, 0xFF, 0xFF, 0xFF},
+	}
+	r := MakeImretroReader(TwoBit|WithPalette|RGBA, palette, 2, 2, make([]byte, 1))
+
+	config, err := DecodeConfig(r, nil)
+
+	if err != nil {
+		t.Fatalf(`err = %v, want nil`, err)
+	}
+
+	tests := []struct {
+		input color.Color
+		want  color.Color
+	}{
+		{black, color.Alpha{0}},
+		{darkGray, color.Alpha{0x55}},
+		{lightGray, color.Alpha{0xAA}},
+		{white, color.Alpha{0xFF}},
+	}
+
+	for _, tt := range tests {
+		t.Logf(`Converting %#v`, tt.input)
+		actual := config.ColorModel.Convert(tt.input)
+		CompareColors(t, actual, tt.want)
+	}
+}
+
 // TestDecode2BitFullRGBAPalette tests that a 2-bit palette would be properly decoded.
 func TestDecode2BitFullRGBAPaletteBitPalette(t *testing.T) {
 	palette := [][]byte{
