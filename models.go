@@ -126,14 +126,13 @@ func (model ColorModel) ColorModel(PixelMode) (self color.Model, ok bool) {
 func init() {
 	// NOTE Sets the colors for the default 8-bit color model.
 	for i := range Default8BitColorModel {
-		rgba := make([]byte, 4)
+		rgba := make(colorBytes, 4)
 		for ci := range rgba {
 			channelIndex := byte(ci)
 			channel := byteutils.SliceR(byte(i), channelIndex*2, (channelIndex*2)+2)
 			channel |= (channel << 6) | (channel << 4) | (channel << 2)
 			rgba[ci] = channel
 		}
-		c := util.ColorFromBytes(rgba)
-		Default8BitColorModel[i] = c
+		Default8BitColorModel[i] = rgba
 	}
 }

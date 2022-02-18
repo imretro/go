@@ -84,7 +84,7 @@ func DecodeConfig(r io.Reader, customModels CustomModel) (image.Config, error) {
 		default:
 			return image.Config{}, MissingModelError(bitsPerPixel)
 		}
-		model, err = decodeModel(r, modelSize, mode&EightBitColors != 0)
+		model, err = decodeModel(r, modelSize, mode&EightBitColors != 0, mode&(0b11<<colorChannelIndex))
 	}
 
 	return image.Config{ColorModel: model, Width: width, Height: height}, err
@@ -106,17 +106,26 @@ func decodeDimensions(r io.Reader) (width, height int, err error) {
 
 // DecodeModel will decode bytes into a ColorModel. The bytes decoded depend on
 // the length of the ColorModel.
-func decodeModel(r io.Reader, size int, accurateColors bool) (color.Model, error) {
+func decodeModel(r io.Reader, size int, accurateColors bool, colorChannels ModeFlag) (color.Model, error) {
 	model := make(ColorModel, size)
+	channelCount := -1
 	chunkSize := 1
 	bitsPerChannel := 2
+	switch colorChannels {
+	case Grayscale:
+		channelCount = 1
+	case RGB:
+		channelCount = 3
+	case RGBA:
+		channelCount = 4
+	}
 	if accurateColors {
-		chunkSize = 4
+		chunkSize = channelCount
 		bitsPerChannel = 8
 	}
 	reader := bitio.NewReader(r, chunkSize)
 	for i := range model {
-		channels := make([]byte, 4)
+		channels := make(colorBytes, channelCount)
 		for i := range channels {
 			bits, _, err := reader.ReadBits(bitsPerChannel)
 			if err != nil {
@@ -125,7 +134,7 @@ func decodeModel(r io.Reader, size int, accurateColors bool) (color.Model, error
 			filledBits := util.FillByte(byte(bits), byte(bitsPerChannel))
 			channels[i] = filledBits
 		}
-		model[i] = util.ColorFromBytes(channels)
+		model[i] = channels
 	}
 	return model, nil
 }

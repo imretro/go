@@ -37,6 +37,18 @@ const paletteIndex byte = 5
 // header.
 const WithPalette byte = 1 << paletteIndex
 
+// ColorChannelIndex is the "index" (from the right) of the bit in the mode byte
+// that signifies the number of color channels in the palette.
+const colorChannelIndex byte = 1
+
+// Feature flags for setting the number of color channels each color will have
+// in the palette. Ignored if the WithPalette flag is not set.
+const (
+	Grayscale ModeFlag = iota << colorChannelIndex
+	RGB
+	RGBA
+)
+
 // ColorAccuracyIndex is the "index" (from the right) of the bit in the mode
 // byte that signifies if the color accuracy that should be used.
 const colorAccuracyIndex byte = 0
