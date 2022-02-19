@@ -667,6 +667,28 @@ func TestDecodeMissingModel(t *testing.T) {
 	}
 }
 
+// TestDecodeNotEnoughPixels tests that the decoder will return an error if
+// there are not enough pixels for the dimensions.
+//
+// Issue #16
+func TestDecodeNotEnoughPixels(t *testing.T) {
+	tests := []struct {
+		mode  ModeFlag
+		bytes int
+	}{
+		{OneBit, 12},
+		{TwoBit, 24},
+		{EightBit, 99},
+	}
+
+	for _, tt := range tests {
+		r := MakeImretroReader(tt.mode, nil, 10, 10, make([]byte, tt.bytes))
+		if _, err := Decode(r, nil); err == nil {
+			t.Errorf(`%d bytes for pixel mode 0b%08b: err = nil`, tt.bytes, tt.mode)
+		}
+	}
+}
+
 // TestDecodeReaderError tests that a reader error would be returned if it
 // occurs.
 func TestDecodeReaderError(t *testing.T) {
