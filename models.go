@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"image/color"
+	"math/bits"
 
 	"github.com/spenserblack/go-byteutils"
 
@@ -67,6 +68,11 @@ func (model ColorModel) PixelMode() PixelMode {
 		return TwoBit
 	}
 	return EightBit
+}
+
+// BitsPerPixel returns the number of bits used for each pixel.
+func (model ColorModel) BitsPerPixel() int {
+	return bits.TrailingZeros(uint(len(model)))
 }
 
 // NewOneBitColorModel creates a new color model for 1-bit-pixel images.

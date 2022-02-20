@@ -31,8 +31,14 @@ func Decode(r io.Reader, customModels CustomModel) (Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	pixels, err := io.ReadAll(r)
-	if err != nil {
+	area := config.Width * config.Height
+	pixelsForByte := 8 / config.ColorModel.(ColorModel).BitsPerPixel()
+	bytesNeeded := area / pixelsForByte
+	if area%pixelsForByte != 0 {
+		bytesNeeded++
+	}
+	pixels := make([]byte, bytesNeeded)
+	if _, err := io.ReadFull(r, pixels); err != nil {
 		return nil, err
 	}
 
