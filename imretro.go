@@ -114,13 +114,7 @@ func (i imretroImage) PixelMode() PixelMode {
 
 // BitsPerPixel returns the number of bits used for each pixel.
 func (i imretroImage) BitsPerPixel() int {
-	switch i.ColorModel().(ColorModel).PixelMode() {
-	case OneBit:
-		return 1
-	case TwoBit:
-		return 2
-	}
-	return 8
+	return i.ColorModel().(ColorModel).BitsPerPixel()
 }
 
 // ColorModel returns the Image's color model.
