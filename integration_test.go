@@ -69,3 +69,24 @@ func TestDecodedImage(t *testing.T) {
 		}
 	}
 }
+
+// TestDecodedMissingPixels decodes an image with missing pixels with
+// image.Decode and ensures that it would not panic.
+func TestDecodedMissingPixels(t *testing.T) {
+	contents := []byte("IMRETRO")
+	pixels := []byte{
+		0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA,
+		0b1000_0000,
+	}
+	contents = append(
+		contents,
+		0,
+		0o000, 0o132, 0o011, // dimensions
+	)
+	contents = append(contents, pixels...)
+	r := bytes.NewBuffer(contents)
+
+	if _, _, err := image.Decode(r); err == nil {
+		t.Fatalf(`err = nil`)
+	}
+}

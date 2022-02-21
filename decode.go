@@ -174,7 +174,7 @@ func init() {
 // can be registered as a format.
 func globalDecode(r io.Reader) (image.Image, error) {
 	i, err := Decode(r, nil)
-	return i.(image.Image), err
+	return i, err
 }
 
 // GlobalDecodeConfig has the proper function type to be registered as a
