@@ -31,11 +31,11 @@ func TestDecodedImage(t *testing.T) {
 
 	bounds := m.Bounds()
 
-	bound_tests := []struct {
+	boundTests := []struct {
 		d    int
 		name rune
 	}{{bounds.Dx(), 'x'}, {bounds.Dy(), 'y'}}
-	for _, tt := range bound_tests {
+	for _, tt := range boundTests {
 		if tt.d != 9 {
 			t.Fatalf(`dimension %c = %d, want 9`, tt.name, tt.d)
 		}
