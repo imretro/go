@@ -27,7 +27,7 @@ func Encode(w io.Writer, m image.Image, pixelMode PixelMode) error {
 	if _, err := w.Write([]byte("IMRETRO")); err != nil {
 		return err
 	}
-	if _, err := w.Write([]byte{pixelMode | WithPalette}); err != nil {
+	if _, err := w.Write([]byte{pixelMode | WithPalette | EightBitColors}); err != nil {
 		return err
 	}
 
