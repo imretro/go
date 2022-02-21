@@ -144,6 +144,10 @@ func TestEncode1BitImage(t *testing.T) {
 		for j := 0; j < 4; j++ {
 			index := j + (i * 4)
 			actual, err := b.ReadByte()
+			if j == 3 {
+				// NOTE Want alpha to always be set for this test
+				want = 0xFF
+			}
 			if err != nil {
 				t.Fatalf(`err = %v, want nil`, err)
 			}
