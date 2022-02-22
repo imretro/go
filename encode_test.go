@@ -13,7 +13,7 @@ func TestEncode1BitHeader(t *testing.T) {
 	var b bytes.Buffer
 	Encode1Bit(t, &b, 320, 240)
 
-	wantHeader := []byte{'I', 'M', 'R', 'E', 'T', 'R', 'O', WithPalette | EightBitColors}
+	wantHeader := []byte{'I', 'M', 'R', 'E', 'T', 'R', 'O', WithPalette | RGBA | EightBitColors}
 
 	for i, actual := range b.Next(len(wantHeader)) {
 

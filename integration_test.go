@@ -121,7 +121,7 @@ func TestEncode1BitImage(t *testing.T) {
 			t.Fatalf(`signature byte %d = %c, want %c`, i, actual, want)
 		}
 	}
-	wantModeByte := imretro.OneBit | imretro.WithPalette | imretro.EightBitColors
+	wantModeByte := imretro.OneBit | imretro.WithPalette | imretro.RGBA | imretro.EightBitColors
 	if actual, err := b.ReadByte(); err != nil {
 		t.Fatalf(`err = %v, want nil`, err)
 	} else if actual != wantModeByte {
